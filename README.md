@@ -1,6 +1,6 @@
 # IoT_4482
 
-## groepsindeling 
+## Groepsindeling 
 - Joachim Geelen
 - Yari Nowicki
 - Siemen Vandervoort
