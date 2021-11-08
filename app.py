@@ -21,7 +21,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets, server=serv
 
 
 layout_page_1 = html.Div([
-    html.H2('Weather App prototype Siemen test'),
+    html.H2('Weather App prototype Joachim test'),
     dcc.Dropdown(
         id='dropdown-time',
         options=[{'label': i, 'value': i} for i in ['9am', '3pm']],
