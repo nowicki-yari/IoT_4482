@@ -84,6 +84,7 @@
 *******************************************************************************/
 int main(void)
 {
+	//This is a test comment
     cy_rslt_t result;
 
     /* Initialize the device and board peripherals */
