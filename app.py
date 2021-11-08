@@ -9,7 +9,7 @@ from flask import request, redirect, url_for
 
 
 
-//Comment
+#Comment
 server = flask.Flask(__name__)
 
 df = pd.read_csv('weather.csv')
