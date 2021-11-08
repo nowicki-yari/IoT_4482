@@ -1,0 +1,164 @@
+Checking if remote manifest is accessible...
+Getting manifests from remote server...
+
+Processing super-manifest https://github.com/cypresssemiconductorco/mtb-super-manifest/raw/v2.X/mtb-super-manifest-fv2.xml...
+Successfully acquired the information.
+
+Summary: 
+
+BSP: CY8CPROTO-062-4343W
+Template Application(s): CapSense Buttons and Slider FreeRTOS
+Application(s) Root Path: C:/iot/IoT_4482/psoc
+
+Press "Create" to create the selected application(s).
+Collecting application data...
+
+
+Info: The following entered on the command line will create the exact same project as that created with the GUI tool:
+C:/Users/11700197/ModusToolbox/tools_2.4/project-creator/project-creator-cli.exe --board-id CY8CPROTO-062-4343W --board-uri https://github.com/cypresssemiconductorco/TARGET_CY8CPROTO-062-4343W --board-commit latest-v2.X --app-id mtb-example-psoc6-capsense-buttons-slider-freertos --app-uri https://github.com/cypresssemiconductorco/mtb-example-psoc6-capsense-buttons-slider-freertos --app-commit latest-v2.X --cypress-tools C:/Users/11700197/ModusToolbox/tools_2.4 --target-dir C:/iot/IoT_4482/psoc --user-app-name CapSense_Buttons_and_Slider_FreeRTOS --output-for-machine --use-modus-shell
+
+
+==============================================================================
+= Cloning 'mtb-example-psoc6-capsense-buttons-slider-freertos' =
+==============================================================================
+Cloning https://github.com/cypresssemiconductorco/mtb-example-psoc6-capsense-buttons-slider-freertos into C:/iot/IoT_4482/psoc directory...
+env git clone --progress --origin cypress https://github.com/cypresssemiconductorco/mtb-example-psoc6-capsense-buttons-slider-freertos CapSense_Buttons_and_Slider_FreeRTOS
+Cloning into 'CapSense_Buttons_and_Slider_FreeRTOS'...
+remote: Enumerating objects: 66, done.        
+remote: Counting objects: 100% (66/66), done.        
+remote: Compressing objects: 100% (44/44), done.        
+remote: Total 66 (delta 33), reused 50 (delta 21), pack-reused 0        
+Receiving objects: 100% (66/66), 231.77 KiB | 19.31 MiB/s, done.
+Resolving deltas: 100% (33/33), done.
+
+Checking out latest-v2.X...
+env git checkout --progress latest-v2.X
+Note: switching to 'latest-v2.X'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 38fbddf Upload mtb-example-psoc6-capsense-buttons-slider-freertos 2.1.0.131
+
+==============================================================================
+= Creating "TARGET_CY8CPROTO-062-4343W.mtb" file(s) =
+==============================================================================
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/deps/TARGET_CY8CPROTO-062-4343W.mtb was updated
+
+==============================================================================
+= Updating Makefile for "CapSense_Buttons_and_Slider_FreeRTOS" =
+==============================================================================
+
+==============================================================================
+= Applying the Latest Version Locking for "CapSense_Buttons_and_Slider_FreeRTOS" =
+==============================================================================
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/deps/TARGET_CY8CPROTO-062-4343W.mtb was updated
+
+==============================================================================
+= Getting Dependencies for "CapSense_Buttons_and_Slider_FreeRTOS" =
+==============================================================================
+C:/Users/11700197/ModusToolbox/tools_2.4/modus-shell/bin/make.exe getlibs CY_TOOLS_PATHS=C:/Users/11700197/ModusToolbox/tools_2.4
+Tools Directory: C:/Users/11700197/ModusToolbox/tools_2.4
+
+==============================================================================
+= Importing libraries =
+==============================================================================
+Git is git version 2.33.0, found at /usr/bin/git
+
+Resolving dependencies...
+Checking if remote manifest is accessible...
+Getting manifests from remote server...
+Processing super-manifest https://github.com/cypresssemiconductorco/mtb-super-manifest/raw/v2.X/mtb-super-manifest-fv2.xml...
+Successfully acquired the information.
+INFO - Warning: Multiple versions of "core-make" requested. Keeping version "latest-v1.X" and discarding version "release-v1.9.0".
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/abstraction-rtos.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/capsense.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/clib-support.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/core-lib.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/core-make.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/mtb-hal-cat1.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/mtb-pdl-cat1.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/psoc6cm0p.mtb was added
+C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/recipe-make-cat1a.mtb was added
+Dependencies resolved.
+
+Searching application directory (.mtb)...
+Found 11 .mtb file(s)
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/deps/TARGET_CY8CPROTO-062-4343W.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/deps/freertos.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/abstraction-rtos.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/capsense.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/clib-support.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/core-lib.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/core-make.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/mtb-hal-cat1.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/mtb-pdl-cat1.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/psoc6cm0p.mtb"
+    Processing file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/recipe-make-cat1a.mtb"
+Libraries processed.
+Created file "C:/iot/IoT_4482/psoc/CapSense_Buttons_and_Slider_FreeRTOS/libs/mtb.mk".
+
+
+==============================================================================
+= Import complete =
+==============================================================================
+
+Project "CapSense_Buttons_and_Slider_FreeRTOS" created successfully.
+==============================================================================
+= Export "CapSense_Buttons_and_Slider_FreeRTOS" application to Eclipse IDE for ModusToolbox™ =
+==============================================================================
+C:/Users/11700197/ModusToolbox/tools_2.4/modus-shell/bin/make.exe eclipse CY_IDE_PRJNAME=CapSense_Buttons_and_Slider_FreeRTOS CY_MAKE_IDE=eclipse CY_MAKE_IDE_VERSION=2.4 CY_TOOLS_PATHS=C:/Users/11700197/ModusToolbox/tools_2.4
+Tools Directory: C:/Users/11700197/ModusToolbox/tools_2.4
+CY8CPROTO-062-4343W.mk: ./libs/TARGET_CY8CPROTO-062-4343W/CY8CPROTO-062-4343W.mk
+
+Running device-configurator to update stale files...
+Log file= "C:/Users/11700197/AppData/Local/Temp/device-configurator-cli/device-configurator-cli-20211108.153133.872-2136.log"
+Command line= "C:/Users/11700197/ModusToolbox/tools_2.4/device-configurator/device-configurator-cli.exe --library ../mtb_shared/mtb-pdl-cat1/release-v2.3.0/devicesupport.xml --build ./libs/TARGET_CY8CPROTO-062-4343W/COMPONENT_BSP_DESIGN_MODUS/design.modus --check-mcu=CY8C624ABZI-S2D44 --check-coprocessors=CYW4343WKUBG --readonly"
+INFO: The design file was last saved with a different version of the tools than was used to perform code generation. Last saved with: Tools Package 2.2.0.2790. Current: Tools Package 2.4.0.5972 (C:/Users/11700197/ModusToolbox/tools_2.4)
+-> Generated device configuration file(s) in ./libs/TARGET_CY8CPROTO-062-4343W/COMPONENT_BSP_DESIGN_MODUS/GeneratedSource
+
+Prebuild operations complete
+Commencing build operations...
+
+Tools Directory: C:/Users/11700197/ModusToolbox/tools_2.4
+CY8CPROTO-062-4343W.mk: ./libs/TARGET_CY8CPROTO-062-4343W/CY8CPROTO-062-4343W.mk
+
+Initializing build: mtb-example-psoc6-capsense-buttons-slider-freertos Debug CY8CPROTO-062-4343W GCC_ARM
+
+Auto-discovery in progress...
+-> Found 223 .c file(s)
+-> Found 46 .S file(s)
+-> Found 25 .s file(s)
+-> Found 0 .cpp file(s)
+-> Found 0 .o file(s)
+-> Found 6 .a file(s)
+-> Found 547 .h file(s)
+-> Found 0 .hpp file(s)
+-> Found 0 resource file(s)
+Applying filters...
+Auto-discovery complete
+
+Constructing build rules...
+Build rules construction complete
+
+==============================================================================
+= Generating IDE files =
+==============================================================================
+
+Generated Eclipse launch config files:  "CapSense_Buttons_and_Slider_FreeRTOS Attach (JLink).launch" "CapSense_Buttons_and_Slider_FreeRTOS Attach (KitProg3_MiniProg4).launch" "CapSense_Buttons_and_Slider_FreeRTOS Debug (JLink).launch" "CapSense_Buttons_and_Slider_FreeRTOS Debug (KitProg3_MiniProg4).launch" "CapSense_Buttons_and_Slider_FreeRTOS Erase (JLink).launch" "CapSense_Buttons_and_Slider_FreeRTOS Erase (KitProg3_MiniProg4).launch" "CapSense_Buttons_and_Slider_FreeRTOS Program (JLink).launch" "CapSense_Buttons_and_Slider_FreeRTOS Program (KitProg3_MiniProg4).launch"
+  
+The project "CapSense_Buttons_and_Slider_FreeRTOS" was successfully exported to Eclipse IDE for ModusToolbox™.
+
+Successfully created and exported "CapSense_Buttons_and_Slider_FreeRTOS" application.
