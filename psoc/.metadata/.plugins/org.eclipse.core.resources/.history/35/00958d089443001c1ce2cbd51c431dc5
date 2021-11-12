@@ -70,9 +70,7 @@
 /* Queue lengths of message queues used in this project */
 #define SINGLE_ELEMENT_QUEUE (1u)
 
-//Without this line, we get error 'uxTopUsedPriority is not defined'
 static volatile int uxTopUsedPriority;
-
 /*******************************************************************************
 * Function Name: main()
 ********************************************************************************
@@ -86,7 +84,6 @@ static volatile int uxTopUsedPriority;
 *******************************************************************************/
 int main(void)
 {
-	//Without this line, we get error 'uxTopUsedPriority is not defined'
 	uxTopUsedPriority = configMAX_PRIORITIES - 1;
 
 	cy_rslt_t result;
