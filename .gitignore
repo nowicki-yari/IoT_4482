@@ -1,2 +1,3 @@
-./psoc/.metadata/
-./psoc/mtb_shared/
+psoc/.metadata/
+psoc/mtb_shared/
+*.log
