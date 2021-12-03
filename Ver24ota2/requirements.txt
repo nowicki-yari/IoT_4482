@@ -1,0 +1,17 @@
+aiohttp==3.6.2
+certifi==2021.10.8
+dnspython==1.16.0
+eventlet==0.29.1
+Flask==1.1.2
+Flask-Bootstrap==3.3.7.1
+Flask-Cors==3.0.9
+Flask-MQTT==1.1.1
+Flask-SocketIO==4.3.1
+Jinja2==2.11.2
+paho-mqtt==1.5.1
+python-engineio==3.13.2
+python-socketio==4.6.0
+webencodings==0.5.1
+Werkzeug==1.0.1
+gunicorn
+
