@@ -59,6 +59,8 @@
 #include "cy_mqtt_api.h"
 #include "cy_retarget_io.h"
 
+#include <inttypes.h>
+
 /******************************************************************************
 * Macros
 ******************************************************************************/
@@ -163,6 +165,17 @@ void publisher_task(void *pvParameters)
 
                 case PUBLISH_MQTT_MSG:
                 {
+                	//Temperatuursensor readout
+
+                    cy_rslt_t rslt;
+
+                    // Initialize pin P10_0 as an input
+                    rslt = cyhal_gpio_init(P10_0, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_ANALOG, 0);
+
+                    // Read the logic level on the input pin
+                    uint32_t read_val = cyhal_gpio_read(P10_0);
+                    printf("%" PRIu32 "\n", read_val);
+
                     /* Publish the data received over the message queue. */
                     publish_info.payload = publisher_q_data.data;
                     publish_info.payload_len = strlen(publish_info.payload);

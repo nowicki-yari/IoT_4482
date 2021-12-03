@@ -146,7 +146,7 @@
  * Uncomment the below line and specify the SNI Host Name to use this extension
  * as specified by the MQTT Broker.
  */
-#define MQTT_SNI_HOSTNAME                 "xxxxxxxxxx.s1.eu.hivemq.cloud"
+#define MQTT_SNI_HOSTNAME                 "45d10f894eec440fb4b40c5d42f407ac.s1.eu.hivemq.cloud"
 
 /* A Network buffer is allocated for sending and receiving MQTT packets over 
  * the network. Specify the size of this buffer using this macro.
