@@ -107,6 +107,79 @@ static void publisher_deinit(void);
 static void isr_button_press(void *callback_arg, cyhal_gpio_event_t event);
 void print_heap_usage(char *msg);
 
+/*
+ * Onderstaande code hoort bij het uitlezen van analoge sensoren
+ */
+#include "cy_pdl.h"
+#include "cyhal.h"
+#include "cybsp.h"
+#include "cy_retarget_io.h"
+
+/*******************************************************************************
+* Macros
+*******************************************************************************/
+/* Macro for ADC Channel configuration*/
+#define SINGLE_CHANNEL 1
+#define MULTI_CHANNEL  2
+
+/*
+ * Macro to choose between single channel and multiple channel configuration of
+ * ADC. Single channel configuration uses channel 0 in single ended mode.
+ * Multiple channel configuration uses two channels, channel 0 in single ended
+ * mode and channel 1 in differential mode.
+ *
+ * The default configuration is set to use single channel.
+ * To use multiple channel configuration set ADC_EXAMPLE_MODE macro to MULTI_CHANNEL.
+ *
+ */
+#define ADC_EXAMPLE_MODE SINGLE_CHANNEL
+
+/* Channel 0 input pin */
+#define VPLUS_CHANNEL_0             (P10_0)
+
+/*******************************************************************************
+*       Enumerated Types
+*******************************************************************************/
+/* ADC Channel constants*/
+enum ADC_CHANNELS
+{
+  CHANNEL_0 = 0,
+  CHANNEL_1,
+  NUM_CHANNELS
+} adc_channel;
+
+/*******************************************************************************
+* Function Prototypes
+*******************************************************************************/
+
+/* Single channel initialization function*/
+void adc_single_channel_init(void);
+
+/* Function to read input voltage from channel 0 */
+void adc_single_channel_process(void);
+
+/*******************************************************************************
+* Global Variables
+*******************************************************************************/
+/* ADC Object */
+cyhal_adc_t adc_obj;
+
+/* ADC Channel 0 Object */
+cyhal_adc_channel_t adc_chan_0_obj;
+
+/* Default ADC configuration */
+const cyhal_adc_config_t adc_config = {
+        .continuous_scanning=false, // Continuous Scanning is disabled
+        .average_count=1,           // Average count disabled
+        .vref=CYHAL_ADC_REF_VDDA,   // VREF for Single ended channel set to VDDA
+        .vneg=CYHAL_ADC_VNEG_VSSA,  // VNEG for Single ended channel set to VSSA
+        .resolution = 12u,          // 12-bit resolution
+        .ext_vref = NC,             // No connection
+        .bypass_pin = NC };       // No connection
+/*
+ * Bovenstaande code hoort bij het uitlezen van analoge sensoren
+ */
+
 /******************************************************************************
  * Function Name: publisher_task
  ******************************************************************************
@@ -142,11 +215,36 @@ void publisher_task(void *pvParameters)
     /* Create a message queue to communicate with other tasks and callbacks. */
     publisher_task_q = xQueueCreate(PUBLISHER_TASK_QUEUE_LENGTH, sizeof(publisher_data_t));
 
+    /*
+     * Onderstaande code hoort bij het uitlezen van de analoge sensoren
+     */
+		/* Initialize Channel 0 */
+		adc_single_channel_init();
+		printf("Test 1\n");
+		/* Update ADC configuration */
+		result = cyhal_adc_configure(&adc_obj, &adc_config);
+
+		printf("Test 2\n");
+
+		if(result != CY_RSLT_SUCCESS)
+		{
+			printf("ADC configuration update failed. Error: %ld\n", (long unsigned int)result);
+			CY_ASSERT(0);
+		}
+
+		printf("Test 3\n");
+
+	/*
+	 * Bovenstaande code hoort bij het uitlezen van de analoge sensoren
+	*/
+
     while (true)
     {
         /* Wait for commands from other tasks and callbacks. */
         if (pdTRUE == xQueueReceive(publisher_task_q, &publisher_q_data, portMAX_DELAY))
         {
+        	printf("Test 4\n");
+
             switch(publisher_q_data.cmd)
             {
                 case PUBLISHER_INIT:
@@ -165,19 +263,21 @@ void publisher_task(void *pvParameters)
 
                 case PUBLISH_MQTT_MSG:
                 {
+                	printf("Start publishing ...\n");
                 	//Temperatuursensor readout
 
-                    cy_rslt_t rslt;
+                	int32_t adc_result_0 = 0;
+					adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
 
-                    // Initialize pin P10_0 as an input
-                    rslt = cyhal_gpio_init(P10_0, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_ANALOG, 0);
-
-                    // Read the logic level on the input pin
-                    uint32_t read_val = cyhal_gpio_read(P10_0);
-                    printf("%" PRIu32 "\n", read_val);
+					char* payloadToMQTT = 1;
+					sprintf(payloadToMQTT,"%lu", adc_result_0);
 
                     /* Publish the data received over the message queue. */
-                    publish_info.payload = publisher_q_data.data;
+                    //publish_info.payload = publisher_q_data.data; normale code
+					publish_info.payload = payloadToMQTT; //onze code
+
+					printf(publish_info.payload);
+
                     publish_info.payload_len = strlen(publish_info.payload);
 
                     printf("  Publisher: Publishing '%s' on the topic '%s'\n\n",
@@ -296,6 +396,83 @@ static void isr_button_press(void *callback_arg, cyhal_gpio_event_t event)
     /* Send the command and data to publisher task over the queue */
     xQueueSendFromISR(publisher_task_q, &publisher_q_data, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+/****************************************************************************************************************************************
+ * Hieronder staat de code om een analoge sensor uit te lezen, sommige code staat ook in de publisher task functie.
+ ****************************************************************************************************************************************
+*/
+
+/*******************************************************************************
+ * Function Name: adc_single_channel_init
+ *******************************************************************************
+ *
+ * Summary:
+ *  ADC single channel initialization function. This function initializes and
+ *  configures channel 0 of ADC.
+ *
+ * Parameters:
+ *  void
+ *
+ * Return:
+ *  void
+ *
+ *******************************************************************************/
+void adc_single_channel_init(void)
+{
+    /* Variable to capture return value of functions */
+    cy_rslt_t result;
+
+    /* Initialize ADC. The ADC block which can connect to pin 10[0] is selected */
+    result = cyhal_adc_init(&adc_obj, VPLUS_CHANNEL_0, NULL);
+    if(result != CY_RSLT_SUCCESS)
+    {
+        printf("ADC initialization failed. Error: %ld\n", (long unsigned int)result);
+        CY_ASSERT(0);
+    }
+
+    /* ADC channel configuration */
+    const cyhal_adc_channel_config_t channel_config = {
+            .enable_averaging = false,  // Disable averaging for channel
+            .min_acquisition_ns = 1000, // Minimum acquisition time set to 1us
+            .enabled = true };          // Sample this channel when ADC performs a scan
+
+    /* Initialize a channel 0 and configure it to scan P10_0 in single ended mode. */
+    result  = cyhal_adc_channel_init_diff(&adc_chan_0_obj, &adc_obj, VPLUS_CHANNEL_0,
+                                          CYHAL_ADC_VNEG, &channel_config);
+    if(result != CY_RSLT_SUCCESS)
+    {
+        printf("ADC single ended channel initialization failed. Error: %ld\n", (long unsigned int)result);
+        CY_ASSERT(0);
+    }
+
+    printf("ADC is configured in single channel configuration\r\n\n");
+    printf("Provide input voltage at pin P10_0. \r\n\n");
+}
+
+/*******************************************************************************
+ * Function Name: adc_single_channel_process
+ *******************************************************************************
+ *
+ * Summary:
+ *  ADC single channel process function. This function reads the input voltage
+ *  and prints the input voltage on UART.
+ *
+ * Parameters:
+ *  void
+ *
+ * Return:
+ *  void
+ *
+ *******************************************************************************/
+void adc_single_channel_process(void)
+{
+    /* Variable to store ADC conversion result from channel 0 */
+    int32_t adc_result_0 = 0;
+
+    /* Read input voltage, convert it to millivolts and print input voltage */
+    adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
+    printf("Channel 0 input: %4ldmV\r\n", (long int)adc_result_0);
 }
 
 /* [] END OF FILE */

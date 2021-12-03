@@ -50,11 +50,11 @@
 ********************************************************************************/
 /* SSID of the Wi-Fi Access Point to which the MQTT client connects. */
 //#define WIFI_SSID                         "xxxxxxx"
-#define WIFI_SSID                         "MotoG8Power"
+#define WIFI_SSID                         "Laptop_Siemen"
 
 /* Passkey of the above mentioned Wi-Fi SSID. */
 //#define WIFI_PASSWORD                     "xxxxxxx"
-#define WIFI_PASSWORD                     "siemen2000"
+#define WIFI_PASSWORD                     "siemenvdv"
 
 /* Security type of the Wi-Fi access point. See 'cy_wcm_security_t' structure
  * in "cy_wcm.h" for more details.
