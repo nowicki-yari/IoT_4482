@@ -218,21 +218,17 @@ void publisher_task(void *pvParameters)
     /*
      * Onderstaande code hoort bij het uitlezen van de analoge sensoren
      */
-		/* Initialize Channel 0 */
-		adc_single_channel_init();
-		printf("Test 1\n");
-		/* Update ADC configuration */
-		result = cyhal_adc_configure(&adc_obj, &adc_config);
+	/* Initialize Channel 0 */
+	adc_single_channel_init();
 
-		printf("Test 2\n");
+	/* Update ADC configuration */
+	result = cyhal_adc_configure(&adc_obj, &adc_config);
 
-		if(result != CY_RSLT_SUCCESS)
-		{
-			printf("ADC configuration update failed. Error: %ld\n", (long unsigned int)result);
-			CY_ASSERT(0);
-		}
-
-		printf("Test 3\n");
+	if(result != CY_RSLT_SUCCESS)
+	{
+		printf("ADC configuration update failed. Error: %ld\n", (long unsigned int)result);
+		CY_ASSERT(0);
+	}
 
 	/*
 	 * Bovenstaande code hoort bij het uitlezen van de analoge sensoren
@@ -243,8 +239,6 @@ void publisher_task(void *pvParameters)
         /* Wait for commands from other tasks and callbacks. */
         if (pdTRUE == xQueueReceive(publisher_task_q, &publisher_q_data, portMAX_DELAY))
         {
-        	printf("Test 4\n");
-
             switch(publisher_q_data.cmd)
             {
                 case PUBLISHER_INIT:
@@ -263,20 +257,14 @@ void publisher_task(void *pvParameters)
 
                 case PUBLISH_MQTT_MSG:
                 {
-                	printf("Start publishing ...\n");
                 	//Temperatuursensor readout
-
-                	int32_t adc_result_0 = 0;
-					adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
-
-					char* payloadToMQTT = 1;
-					sprintf(payloadToMQTT,"%lu", adc_result_0);
+                	long int adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
+                	printf("Result from sensor %d\n", adc_result_0);
 
                     /* Publish the data received over the message queue. */
-                    //publish_info.payload = publisher_q_data.data; normale code
-					publish_info.payload = payloadToMQTT; //onze code
+                    //publish_info.payload = publisher_q_data.data; //normale code van het voorbeeld
 
-					printf(publish_info.payload);
+                	publish_info.payload = "___"; //onze sensorwaarde zou toegewezen moeten worden aan de payload
 
                     publish_info.payload_len = strlen(publish_info.payload);
 
