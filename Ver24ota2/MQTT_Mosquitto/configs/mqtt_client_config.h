@@ -69,7 +69,7 @@
 /********************* MQTT MESSAGE CONFIGURATION MACROS **********************/
 /* The MQTT topics to be used by the publisher ctand subscriber. */
 #define MQTT_PUB_TOPIC                    "ledstatus"
-#define MQTT_SUB_TOPIC                    "ledstatus"
+#define MQTT_SUB_TOPIC                    "pwm"
 
 /* Set the QoS that is associated with the MQTT publish, and subscribe messages.
  * Valid choices are 0, 1, and 2. Other values should not be used in this macro.
@@ -94,8 +94,8 @@
 /* MQTT messages which are published on the MQTT_PUB_TOPIC that controls the
  * device (user LED in this example) state in this code example.
  */
-#define MQTT_DEVICE_ON_MESSAGE            "TURN ON"
-#define MQTT_DEVICE_OFF_MESSAGE           "TURN OFF"
+#define MQTT_DEVICE_ON_MESSAGE            "RIGHT"
+#define MQTT_DEVICE_OFF_MESSAGE           "LEFT"
 
 
 /******************* OTHER MQTT CLIENT CONFIGURATION MACROS *******************/

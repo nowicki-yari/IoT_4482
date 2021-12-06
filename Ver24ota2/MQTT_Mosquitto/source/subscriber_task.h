@@ -55,8 +55,12 @@
 #define SUBSCRIBER_TASK_STACK_SIZE         (1024 * 1)
 
 /* 8-bit value denoting the device (LED) state. */
+/*
 #define DEVICE_ON_STATE                    (0x00u)
 #define DEVICE_OFF_STATE                   (0x01u)
+*/
+#define DEVICE_ON_STATE                    (40.0f)
+#define DEVICE_OFF_STATE                   (60.0f)
 
 /*******************************************************************************
 * Global Variables

@@ -47,6 +47,9 @@
 #include "string.h"
 #include "FreeRTOS.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /* Task header files */
 #include "subscriber_task.h"
 #include "mqtt_task.h"
@@ -74,6 +77,12 @@
  * subscriber task.
  */
 #define SUBSCRIBER_TASK_QUEUE_LENGTH            (1u)
+
+/* PWM Frequency = 50Hz */
+#define PWM_FREQUENCY (50u)
+
+/* servo pin */
+#define VPLUS_CHANNEL_0             			(P10_3)
 
 /******************************************************************************
 * Global Variables
@@ -122,14 +131,31 @@ void print_heap_usage(char *msg);
  ******************************************************************************/
 void subscriber_task(void *pvParameters)
 {
+	/* PWM object */
+	cyhal_pwm_t pwm_led_control;
+	/* API return code */
+	cy_rslt_t result;
+
+	float value; //input for pwm
+	char str[20];
     subscriber_data_t subscriber_q_data;
 
     /* To avoid compiler warnings */
     (void) pvParameters;
 
     /* Initialize the User LED. */
+    /*
     cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_PULLUP,
                     CYBSP_LED_STATE_OFF);
+	*/
+
+    /* Initialize the PWM */
+	cyhal_pwm_init(&pwm_led_control, VPLUS_CHANNEL_0, NULL);
+	if(CY_RSLT_SUCCESS != result)
+	{
+		printf("API cyhal_pwm_init failed with error code: %lu\r\n", (unsigned long) result);
+		CY_ASSERT(false);
+	}
 
     /* Subscribe to the specified MQTT topic. */
     subscribe_to_topic();
@@ -158,13 +184,25 @@ void subscriber_task(void *pvParameters)
 
                 case UPDATE_DEVICE_STATE:
                 {
-                    /* Update the LED state as per received notification. */
-                    cyhal_gpio_write(CYBSP_USER_LED, subscriber_q_data.data);
+                	strcpy(str, subscriber_q_data.data);
+                	value = atof(str);
+                	printf("String value: %s\n", subscriber_q_data.data);
+                	printf("Int value: %f\n", value);
 
-                    /* Update the current device state extern variable. */
-                    current_device_state = subscriber_q_data.data;
-
-                    print_heap_usage("subscriber_task: After updating LED state");
+                	/* Set the PWM output frequency and duty cycle */
+					result = cyhal_pwm_set_duty_cycle(&pwm_led_control, value, PWM_FREQUENCY);
+					if(CY_RSLT_SUCCESS != result)
+					{
+						printf("API cyhal_pwm_set_duty_cycle failed with error code: %lu\r\n", (unsigned long) result);
+						CY_ASSERT(false);
+					}
+					/* Start the PWM */
+					result = cyhal_pwm_start(&pwm_led_control);
+					if(CY_RSLT_SUCCESS != result)
+					{
+						printf("API cyhal_pwm_start failed with error code: %lu\r\n", (unsigned long) result);
+						CY_ASSERT(false);
+					}
                     break;
                 }
             }
@@ -259,6 +297,7 @@ void mqtt_subscription_callback(cy_mqtt_publish_info_t *received_msg_info)
     subscriber_q_data.cmd = UPDATE_DEVICE_STATE;
 
     /* Assign the device state depending on the received MQTT message. */
+
     if ((strlen(MQTT_DEVICE_ON_MESSAGE) == received_msg_len) &&
         (strncmp(MQTT_DEVICE_ON_MESSAGE, received_msg, received_msg_len) == 0))
     {
