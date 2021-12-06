@@ -52,7 +52,7 @@
 /***************** MQTT CLIENT CONNECTION CONFIGURATION MACROS *****************/
 /* MQTT Broker/Server address and port used for the MQTT connection. */
 //#define MQTT_BROKER_ADDRESS               "192.168.1.5"
-#define MQTT_BROKER_ADDRESS "45d10f894eec440fb4b40c5d42f407ac.s1.eu.hivemq.cloud"
+#define MQTT_BROKER_ADDRESS "e83b7b9f6de84440b629c443336adf69.s1.eu.hivemq.cloud"
 
 #define MQTT_PORT                         8883
 
@@ -62,8 +62,8 @@
 #define MQTT_SECURE_CONNECTION            ( 1 )
 
 /* Configure the user credentials to be sent as part of MQTT CONNECT packet */
-#define MQTT_USERNAME                     "WeatherStation1"
-#define MQTT_PASSWORD                     "WeatherStation1"
+#define MQTT_USERNAME                     "psoc6_1"
+#define MQTT_PASSWORD                     "IoT_4482"
 
 
 /********************* MQTT MESSAGE CONFIGURATION MACROS **********************/
@@ -146,7 +146,7 @@
  * Uncomment the below line and specify the SNI Host Name to use this extension
  * as specified by the MQTT Broker.
  */
-#define MQTT_SNI_HOSTNAME                 "45d10f894eec440fb4b40c5d42f407ac.s1.eu.hivemq.cloud"
+#define MQTT_SNI_HOSTNAME                 "e83b7b9f6de84440b629c443336adf69.s1.eu.hivemq.cloud"
 
 /* A Network buffer is allocated for sending and receiving MQTT packets over 
  * the network. Specify the size of this buffer using this macro.

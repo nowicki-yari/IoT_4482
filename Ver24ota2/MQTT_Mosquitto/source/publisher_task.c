@@ -47,6 +47,10 @@
 #include "cybsp.h"
 #include "FreeRTOS.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 /* Task header files */
 #include "publisher_task.h"
 #include "mqtt_task.h"
@@ -258,13 +262,19 @@ void publisher_task(void *pvParameters)
                 case PUBLISH_MQTT_MSG:
                 {
                 	//Temperatuursensor readout
-                	long int adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
+                	int adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
                 	printf("Result from sensor %d\n", adc_result_0);
+
+
+                	// convert 123 to string [buf]
+                	char snum[5];
+                	itoa(adc_result_0, snum, 10);
+
 
                     /* Publish the data received over the message queue. */
                     //publish_info.payload = publisher_q_data.data; //normale code van het voorbeeld
 
-                	publish_info.payload = "___"; //onze sensorwaarde zou toegewezen moeten worden aan de payload
+                	publish_info.payload = snum; //onze sensorwaarde zou toegewezen moeten worden aan de payload
 
                     publish_info.payload_len = strlen(publish_info.payload);
 
