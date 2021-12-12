@@ -12,11 +12,11 @@ eventlet.monkey_patch()
 app = Flask(__name__)
 app.config['SECRET'] = 'my secret key'
 app.config['TEMPLATES_AUTO_RELOAD'] = False
-app.config['MQTT_BROKER_URL'] = '45d10f894eec440fb4b40c5d42f407ac.s1.eu.hivemq.cloud'
+app.config['MQTT_BROKER_URL'] = 'e83b7b9f6de84440b629c443336adf69.s1.eu.hivemq.cloud'
 #app.config['MQTT_BROKER_URL'] = '192.168.1.5'
 #app.config['MQTT_BROKER_PORT'] = 1883
-app.config['MQTT_USERNAME'] = 'WeatherStation1'
-app.config['MQTT_PASSWORD'] = 'WeatherStation1'
+app.config['MQTT_USERNAME'] = 'psoc6_1'
+app.config['MQTT_PASSWORD'] = 'IoT_4482'
 app.config['MQTT_KEEPALIVE'] = 5
 
 # Parameters for SSL enabled
@@ -38,6 +38,11 @@ bootstrap = Bootstrap(app)
 socketio = SocketIO(app,cors_allowed_origins='*')
 #socketio.init_app(app, cors_allowed_origins="*")
 
+
+@app.route('/dashboard')
+def index_dashboard():
+    mqtt.subscribe('ledstatus')
+    return render_template('dashboard.html')
 
 @app.route('/')
 def index():
@@ -70,4 +75,4 @@ def handle_logging(client, userdata, level, buf):
     print(level, buf)
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=80, use_reloader=False, debug=True)
+    socketio.run(app, host='127.0.0.1', port=80, use_reloader=False, debug=True)

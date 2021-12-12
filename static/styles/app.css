@@ -1,0 +1,53 @@
+h1 {
+    text-align: center;
+}
+
+body {
+    font-family: "Lucida Console", "Courier New", monospace;
+    height: 100%;
+    margin: 0;
+}
+
+.grid-container {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-areas:
+  'header header header'
+  'menu main right'
+  'footer footer footer';
+    grid-template-columns: 14% 70% 16%;
+    grid-template-rows: 12% 81% 7%;
+}
+
+.grid-container {
+    overflow: hidden;
+}
+
+/*HEADER*/
+.item1 {
+    grid-area: header;
+    width: 100%;
+    text-align: center;
+}
+/*Navigation*/
+.item2 {
+    grid-area: menu;
+    text-align: center;
+}
+/*MAIN*/
+.item3 {
+    grid-area: main;
+}
+
+/*Right*/
+.item4 {
+    grid-area: right;
+}
+
+/*Footer*/
+.item5 {
+    grid-area: footer;
+    width: 100%;
+    text-align: center;
+}
