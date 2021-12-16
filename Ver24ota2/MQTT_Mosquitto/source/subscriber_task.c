@@ -82,7 +82,7 @@
 #define PWM_FREQUENCY (50u)
 
 /* servo pin */
-#define VPLUS_CHANNEL_0             			(P10_3)
+#define VPLUS_CHANNEL_0             			(P10_4)
 
 /******************************************************************************
 * Global Variables

@@ -94,8 +94,8 @@
 /* MQTT messages which are published on the MQTT_PUB_TOPIC that controls the
  * device (user LED in this example) state in this code example.
  */
-#define MQTT_DEVICE_ON_MESSAGE            "RIGHT"
-#define MQTT_DEVICE_OFF_MESSAGE           "LEFT"
+#define MQTT_DEVICE_ON_MESSAGE            "ON"
+#define MQTT_DEVICE_OFF_MESSAGE           "OFF"
 
 
 /******************* OTHER MQTT CLIENT CONFIGURATION MACROS *******************/

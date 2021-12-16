@@ -13,6 +13,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
 <script type="text/javascript" charset="utf-8">
+    var socket = io.connect('/');
     const ctx = document.getElementById('temperature_chart').getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'line',
@@ -40,12 +41,13 @@
     });
     $(document).ready(function() {
         //var socket = io.connect('http://' + document.domain + ':' + location.port, {secure: true});
-        var socket = io.connect('/');
+
         socket.on('mqtt_message', function(data) {
             const d = new Date();
             let time = d.toLocaleTimeString();
             addData(myChart, time, data['payload']);
         })
+
     });
 
     function addData(chart, label, data) {
@@ -56,6 +58,10 @@
         chart.update();
     }
 
+    function publish(message) {
+        var data = '{"topic": "pwm", "message": "' + message + '", "qos": 1}';
+        socket.emit('publish', data=data);
+    }
 
 </script>
 {% endblock %}
@@ -76,7 +82,9 @@
             <canvas id="temperature_chart"></canvas>
         </div>
         <div class="item4">
-            <h2>Menu right side</h2>
+            <h2>Moisture sensor</h2>
+            <button onclick="publish('ON')">Enable</button>
+            <button onclick="publish('OFF')">Disable</button>
         </div>
         <div class="item5">
             <h5>Footer</h5>
