@@ -6,6 +6,14 @@ from flask_socketio import SocketIO
 from flask_bootstrap import Bootstrap
 from flask_cors import CORS, cross_origin
 import ssl
+from datetime import datetime
+import firebase_admin
+import json
+cred_obj = firebase_admin.credentials.Certificate('weatherstation-iot-8558e-firebase-adminsdk-boway-7b9758599c.json')
+databaseURL = "https://weatherstation-iot-8558e-default-rtdb.firebaseio.com/"
+default_app = firebase_admin.initialize_app(cred_obj, {'databaseURL':databaseURL})
+from firebase_admin import db
+ref = db.reference("/Data")
 
 eventlet.monkey_patch()
 
@@ -69,11 +77,38 @@ def handle_unsubscribe_all():
 
 @mqtt.on_message()
 def handle_mqtt_message(client, userdata, message):
-    data = dict(
-        topic=message.topic,
-        payload=message.payload.decode()
-    )
-    socketio.emit('mqtt_message', data=data)
+	data = dict(
+		topic=message.topic,
+		payload=message.payload.decode()
+	)
+	
+	#Upload data to firebase
+	now = datetime.now()
+	timeString = now.strftime("[%d,%m,%Y,%H,%M,%S]")
+	print("Time: " + timeString + ",	Data: " + str(data["payload"]))
+
+	json_date = "\"date\": " + str(timeString)
+	json_data = "\"data\": " + str(data["payload"])
+
+	json_string = str("{" + json_date + ", " + json_data + "}")
+
+	ref.push().set(json_string)
+
+	socketio.emit('mqtt_message', data=data)
+
+@app.route('/returnData')
+def returnData():
+	#Get the data
+	data = ref.get()
+	data_json = json.dumps(data)
+	data_json = json.loads(data_json)
+
+	#Get the values
+	for dataPoint in data_json.values():
+		value = json.loads(dataPoint)["data"]
+		print(str(value))
+
+	return "No html page"
 
 @mqtt.on_log()
 def handle_logging(client, userdata, level, buf):
