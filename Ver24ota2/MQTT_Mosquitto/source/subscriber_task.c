@@ -82,7 +82,7 @@
 #define PWM_FREQUENCY (50u)
 
 /* servo pin */
-#define VPLUS_CHANNEL_0             			(P10_4)
+#define VPLUS_CHANNEL_0             			(P10_3)
 
 /******************************************************************************
 * Global Variables
@@ -168,6 +168,7 @@ void subscriber_task(void *pvParameters)
         /* Wait for commands from other tasks and callbacks. */
         if (pdTRUE == xQueueReceive(subscriber_task_q, &subscriber_q_data, portMAX_DELAY))
         {
+        	//printf("%.6f", subscriber_q_data);
             switch(subscriber_q_data.cmd)
             {
                 case SUBSCRIBE_TO_TOPIC:
@@ -184,13 +185,12 @@ void subscriber_task(void *pvParameters)
 
                 case UPDATE_DEVICE_STATE:
                 {
-                	strcpy(str, subscriber_q_data.data);
-                	value = atof(str);
-                	printf("String value: %s\n", subscriber_q_data.data);
-                	printf("Int value: %f\n", value);
 
+                	value = atof(subscriber_q_data.data);
+                	printf("%.6f", value);
                 	/* Set the PWM output frequency and duty cycle */
 					result = cyhal_pwm_set_duty_cycle(&pwm_led_control, value, PWM_FREQUENCY);
+
 					if(CY_RSLT_SUCCESS != result)
 					{
 						printf("API cyhal_pwm_set_duty_cycle failed with error code: %lu\r\n", (unsigned long) result);

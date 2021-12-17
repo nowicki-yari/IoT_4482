@@ -165,6 +165,9 @@ void adc_single_channel_process(void);
 /*******************************************************************************
 * Global Variables
 *******************************************************************************/
+cyhal_lptimer_t lptimer_obj;
+cyhal_lptimer_info_t lptimer_obj_info;
+
 /* ADC Object */
 cyhal_adc_t adc_obj;
 
@@ -287,7 +290,7 @@ void publisher_task(void *pvParameters)
                     {
                         printf("  Publisher: MQTT Publish failed with error 0x%0X.\n\n", (int)result);
 
-                        /* Communicate the publish failure with the the MQTT 
+                        /* Communicate the publish failure with the the MQTT
                          * client task.
                          */
                         mqtt_task_cmd = HANDLE_MQTT_PUBLISH_FAILURE;
@@ -369,19 +372,20 @@ static void publisher_deinit(void)
  *  void
  *
  ******************************************************************************/
+
 static void isr_button_press(void *callback_arg, cyhal_gpio_event_t event)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     publisher_data_t publisher_q_data;
 
-    /* To avoid compiler warnings */
+    //To avoid compiler warnings
     (void) callback_arg;
     (void) event;
 
-    /* Assign the publish command to be sent to the publisher task. */
+    //Assign the publish command to be sent to the publisher task.
     publisher_q_data.cmd = PUBLISH_MQTT_MSG;
 
-    /* Assign the publish message payload so that the device state toggles. */
+    //Assign the publish message payload so that the device state toggles.
     if (current_device_state == DEVICE_ON_STATE)
     {
         publisher_q_data.data = (char *)MQTT_DEVICE_OFF_MESSAGE;
@@ -391,7 +395,7 @@ static void isr_button_press(void *callback_arg, cyhal_gpio_event_t event)
         publisher_q_data.data = (char *)MQTT_DEVICE_ON_MESSAGE;
     }
 
-    /* Send the command and data to publisher task over the queue */
+    //Send the command and data to publisher task over the queue
     xQueueSendFromISR(publisher_task_q, &publisher_q_data, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -472,5 +476,6 @@ void adc_single_channel_process(void)
     adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
     printf("Channel 0 input: %4ldmV\r\n", (long int)adc_result_0);
 }
+
 
 /* [] END OF FILE */
