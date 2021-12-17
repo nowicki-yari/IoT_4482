@@ -50,7 +50,7 @@
 ********************************************************************************/
 /* SSID of the Wi-Fi Access Point to which the MQTT client connects. */
 //#define WIFI_SSID                         "xxxxxxx"
-#define WIFI_SSID                         "MotoG8Power"
+#define WIFI_SSID                         "Laptop_Siemen"
 //#define WIFI_SSID                         	"telenet-DCED8"
 //#define WIFI_SSID                         	"OnePlus8T"
 /* Passkey of the above mentioned Wi-Fi SSID. */

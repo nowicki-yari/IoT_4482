@@ -84,10 +84,22 @@ def handle_mqtt_message(client, userdata, message):
 	
 	#Upload data to firebase
 	now = datetime.now()
-	timeString = now.strftime("[%d,%m,%Y,%H,%M,%S]")
-	print("Time: " + timeString + ",	Data: " + str(data["payload"]))
+	timeString = now.strftime("%d,%m,%Y,%H,%M,%S")
+	timeSplit = timeString.split(",")
+	timeMap = map(int, timeSplit)
+	timeList = list(timeMap)
+	print(str(timeList))
+	"""
+	for value in range(0, 6):
+		string = str(timeList[value])
+		if string[0:1] == 0:
+			timeList[value] = int(string[1:2])
+	print(str(timeList))
+	"""
 
-	json_date = "\"date\": " + str(timeString)
+	print("Time: " + str(timeList) + ",	Data: " + str(data["payload"]))
+
+	json_date = "\"date\": " + str((timeList))
 	json_data = "\"data\": " + str(data["payload"])
 
 	json_string = str("{" + json_date + ", " + json_data + "}")
@@ -104,15 +116,23 @@ def returnData():
 	data_json = json.loads(data_json)
 
 	#Get the values
+	time = []
+	value = []
 	for dataPoint in data_json.values():
-		value = json.loads(dataPoint)["data"]
-		print(str(value))
+		json_string = json.loads(dataPoint)
+		time.append(json_string["date"])
+		value.append(json_string["data"])
 
-	return "No html page"
+	
+
+	return str(time)
 
 @mqtt.on_log()
 def handle_logging(client, userdata, level, buf):
     print(level, buf)
+
+def reWriteDigit(digit):
+	return 0
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=80, use_reloader=False, debug=True)

@@ -64,6 +64,7 @@
 #include "cy_retarget_io.h"
 
 #include <inttypes.h>
+#include <math.h>
 
 /******************************************************************************
 * Macros
@@ -265,9 +266,15 @@ void publisher_task(void *pvParameters)
                 case PUBLISH_MQTT_MSG:
                 {
                 	//Temperatuursensor readout
-                	int adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
+                	float adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
                 	printf("Result from sensor %d\n", adc_result_0);
 
+                	//Recalculate value to °C
+					float value = (adc_result_0/4095.0)*5000;
+					float celcius = value/10;
+					float farhenheit = (celcius*9)/5 + 32;
+
+					printf("Temperature = %10.10f", celcius);
 
                 	// convert 123 to string [buf]
                 	char snum[5];
