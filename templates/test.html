@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <link rel="icon" href="/favicon.ico">
 
-    <title>Bootstrap 4 Template</title>
+    <title>IoT Weather Station</title>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css" integrity="sha384-MIwDKRSSImVFAZCVLtU0LMDdON6KVCrZHyVQQj6e8wIEJkW4tvwqXrbMIya1vriY" crossorigin="anonymous">
@@ -45,29 +45,23 @@
             <button class="navbar-toggler hidden-md-up pull-right" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
                 &#9776;
             </button>
-            <a class="navbar-brand" href="#">Logo</a>
+            <a class="navbar-brand" href="#">Home</a>
             <div class="collapse navbar-toggleable-sm" id="collapsingNavbar">
                 <ul class="nav navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#grid">Grid</a>
+                        <a class="nav-link" href="#soilData">Soil Data</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#cards">Cards</a>
+                        <a class="nav-link" href="#temperatureData">Temperature Data</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#tags">Tags</a>
+                        <a class="nav-link" href="#history">History</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#customForms">Forms</a>
+                        <a class="nav-link" href="#measurementSettings">Measurement Settings</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#outlineButtons">Buttons</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#progress">Progress Bars</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#tables">Tables</a>
+                        <a class="nav-link" href="#about">About</a>
                     </li>
                 </ul>
             </div>
@@ -76,14 +70,37 @@
 
     <div class="jumbotron jumbotron-fluid">
       <div class="container">
-        <h1 class="display-3">Fluid Jumbotron!</h1>
-        <p>This is a fluid jumbotron. Fluid jumbotrons occupy the entire horizontal space of its parent.</p>
-        <p>Fluid jumbotrons are new in Bootstrap 4.</p>
-        <p><a class="btn btn-primary btn-lg" href="http://www.quackit.com/bootstrap/bootstrap_4/tutorial/bootstrap_jumbotron.cfm" role="button">Jumbotron Examples &raquo;</a></p>
+        <h1 class="display-3">Welcome to the Weatherstation</h1>
+        <p>This weather station monitors the soil moisture at different depths in the subsoil as well as the outdoor temperature. The depth is adjustable via this dashboard. The dashboard also displays the measurement results in real time and from the past days.</p>
+        <p>Application created by Yari Nowicki & Siemen Vandervoort!</p>
+        <p><a class="btn btn-primary btn-lg" href="https://www.buienradar.be/" role="button">Weather radar &raquo;</a></p>
       </div>
     </div>
 
     <div class="container">
+		<section id="soilData">
+			<h2> Soil Data </h2>
+            <p> This graph shows the real time soil data as a function of time.</p>
+		</section>
+		<section id="temperatureData">
+			<h2> Temperature Data </h2>
+            <p> This graph shows the real time temperature data as a function of time.</p>
+		</section>
+		<section id="history">
+			<h2> Data History </h2>
+            <p> Here you can find the previous measurements. </p>
+		</section>
+		<section id="measurementSettings">
+			<h2> Measurement Settings </h2>
+            <p> Here you can change the settings of the measurements.</p>
+		</section>
+		<section id="about">
+			<h2> About The Authors </h2>
+            <p> This assignment was made for the Internet of Things course that is part of the master year for Electronics and ICT engineering technology. </p>
+		</section>
+
+
+
         <section id="grid">
             <h2>Bigger Grid</h2>
             <p>OK, maybe not <em>bigger</em> but... Bootstrap 4 uses a 5 tier grid system compared to the 4 tier grid system in Bootstrap 3.</p>
