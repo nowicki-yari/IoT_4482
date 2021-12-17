@@ -98,8 +98,6 @@
         //var socket = io.connect('http://' + document.domain + ':' + location.port, {secure: true});
 
         socket.on('historical_data', function(data) {
-            const d = new Date();
-            let time = d.toLocaleTimeString();
             addData(historicalData, data['time'], data['value']);
         })
 
@@ -132,6 +130,20 @@
           });
         });
 </script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+          $('a#day_yesterday').on('click', function(e) {
+            e.preventDefault()
+            $.getJSON('/data_yesterday',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
+</script>
+  
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -221,9 +233,12 @@
 		<section id="history">
 			<h2> Data History </h2>
 			<p> Here you can find the previous measurements. </p>
-			<form>
-				<a href=# id=day_today><button class='btn btn-default'>Today</button></a>
-			</form>
+				<form>
+					<a href=# id=day_today><button class='btn btn-default'>Today</button></a>
+				</form>
+				<form>
+					<a href=# id=day_yesterday><button class='btn btn-default'>Yesterday</button></a>
+				</form>
 			<canvas id="temperature_history_chart"></canvas>
 		</section>
 		<section id="measurementSettings">
