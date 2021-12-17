@@ -11,7 +11,7 @@
 <script type="text/javascript" charset="utf-8">
   $(document).ready(function() {
     //var socket = io.connect('http://' + document.domain + ':' + location.port, {secure: true});
-	var socket = io.connect('/');
+	var socket = io();
     $('#publish').click(function(event) {
       var topic = $('#topic').val();
       var message = $('#message').val();

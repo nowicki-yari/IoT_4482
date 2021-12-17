@@ -44,6 +44,11 @@ def index_dashboard():
     mqtt.subscribe('ledstatus')
     return render_template('dashboard.html')
 
+@app.route('/dashboard2')
+def index_dashboard2():
+    mqtt.subscribe('ledstatus')
+    return render_template('test.html')
+
 @app.route('/')
 def index():
     return render_template('index.html')
