@@ -7,10 +7,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
 <script type="text/javascript" charset="utf-8">
     var socket = io();
-    var myChart;
+    var realTimeData;
     window.addEventListener('load', function() {
         const ctx = document.getElementById('temperature_chart').getContext('2d');
-        myChart = new Chart(ctx, {
+        realTimeData = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: [{
@@ -43,7 +43,7 @@
         socket.on('mqtt_message', function(data) {
             const d = new Date();
             let time = d.toLocaleTimeString();
-            addData(myChart, time, data['payload']);
+            addData(realTimeData, time, data['payload']);
         })
 
     });
@@ -61,6 +61,76 @@
         socket.emit('publish', data=data);
     }
 
+</script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    var historicalData;
+    window.addEventListener('load', function() {
+        const ctx = document.getElementById('temperature_history_chart').getContext('2d');
+        historicalData = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Temperature',
+                data: []
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+        }
+    });
+    })
+
+
+    $(document).ready(function() {
+        //var socket = io.connect('http://' + document.domain + ':' + location.port, {secure: true});
+
+        socket.on('historical_data', function(data) {
+            const d = new Date();
+            let time = d.toLocaleTimeString();
+            addData(historicalData, data['time'], data['value']);
+        })
+
+    });
+
+    function addData(chart, label, data) {
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.push(data);
+        });
+        chart.update();
+    }
+
+    function publish(message) {
+        var data = '{"topic": "pwm", "message": "' + message + '", "qos": 1}';
+        socket.emit('publish', data=data);
+    }
+
+</script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+          $('a#day_today').on('click', function(e) {
+            e.preventDefault()
+            $.getJSON('/data_today',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
 </script>
 <html lang="en">
   <head>
@@ -150,7 +220,11 @@
 		</section>
 		<section id="history">
 			<h2> Data History </h2>
-            <p> Here you can find the previous measurements. </p>
+			<p> Here you can find the previous measurements. </p>
+			<form>
+				<a href=# id=day_today><button class='btn btn-default'>Today</button></a>
+			</form>
+			<canvas id="temperature_history_chart"></canvas>
 		</section>
 		<section id="measurementSettings">
 			<h2> Measurement Settings </h2>

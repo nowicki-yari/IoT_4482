@@ -110,6 +110,12 @@ def handle_mqtt_message(client, userdata, message):
 
 @app.route('/returnData')
 def returnData():
+	print("Displaying historical data")
+
+
+#background process happening without any refreshing
+@app.route('/data_today')
+def data_today():
 	#Get the data
 	data = ref.get()
 	data_json = json.dumps(data)
@@ -123,9 +129,14 @@ def returnData():
 		time.append(json_string["date"])
 		value.append(json_string["data"])
 
-	
+	data = dict(
+		time = time,
+		value = value
+	)
 
-	return str(time)
+	socketio.emit('historical_data', data=data)
+
+	return ("nothing")
 
 @mqtt.on_log()
 def handle_logging(client, userdata, level, buf):
