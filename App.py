@@ -9,6 +9,7 @@ import ssl
 from datetime import datetime
 import firebase_admin
 import json
+
 cred_obj = firebase_admin.credentials.Certificate('weatherstation-iot-8558e-firebase-adminsdk-boway-7b9758599c.json')
 databaseURL = "https://weatherstation-iot-8558e-default-rtdb.firebaseio.com/"
 default_app = firebase_admin.initialize_app(cred_obj, {'databaseURL':databaseURL})
