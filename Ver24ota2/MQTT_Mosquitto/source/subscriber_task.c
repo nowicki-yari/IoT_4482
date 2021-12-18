@@ -78,8 +78,8 @@
  */
 #define SUBSCRIBER_TASK_QUEUE_LENGTH            (1u)
 
-/* PWM Frequency = 2Hz */
-#define PWM_FREQUENCY (2u)
+/* PWM Frequency = 50Hz */
+#define PWM_FREQUENCY (50u)
 
 
 /* servo pin */

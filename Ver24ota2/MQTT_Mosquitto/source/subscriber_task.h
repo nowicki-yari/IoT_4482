@@ -59,8 +59,8 @@
 #define DEVICE_ON_STATE                    (0x00u)
 #define DEVICE_OFF_STATE                   (0x01u)
 */
-#define DEVICE_ON_STATE                    (100.0f)
-#define DEVICE_OFF_STATE                   (0.0f)
+#define DEVICE_ON_STATE                    (5.0f)
+#define DEVICE_OFF_STATE                   (15.0f)
 
 /*******************************************************************************
 * Global Variables
