@@ -78,11 +78,12 @@
  */
 #define SUBSCRIBER_TASK_QUEUE_LENGTH            (1u)
 
-/* PWM Frequency = 50Hz */
-#define PWM_FREQUENCY (50u)
+/* PWM Frequency = 2Hz */
+#define PWM_FREQUENCY (2u)
+
 
 /* servo pin */
-#define VPLUS_CHANNEL_0             			(P10_3)
+#define VPLUS_CHANNEL_0             			(P10_4)
 
 /******************************************************************************
 * Global Variables
@@ -135,9 +136,7 @@ void subscriber_task(void *pvParameters)
 	cyhal_pwm_t pwm_led_control;
 	/* API return code */
 	cy_rslt_t result;
-
-	float value; //input for pwm
-	char str[20];
+	float input;
     subscriber_data_t subscriber_q_data;
 
     /* To avoid compiler warnings */
@@ -150,7 +149,7 @@ void subscriber_task(void *pvParameters)
 	*/
 
     /* Initialize the PWM */
-	cyhal_pwm_init(&pwm_led_control, VPLUS_CHANNEL_0, NULL);
+	result = cyhal_pwm_init(&pwm_led_control, VPLUS_CHANNEL_0, NULL);
 	if(CY_RSLT_SUCCESS != result)
 	{
 		printf("API cyhal_pwm_init failed with error code: %lu\r\n", (unsigned long) result);
@@ -168,7 +167,6 @@ void subscriber_task(void *pvParameters)
         /* Wait for commands from other tasks and callbacks. */
         if (pdTRUE == xQueueReceive(subscriber_task_q, &subscriber_q_data, portMAX_DELAY))
         {
-        	//printf("%.6f", subscriber_q_data);
             switch(subscriber_q_data.cmd)
             {
                 case SUBSCRIBE_TO_TOPIC:
@@ -185,11 +183,10 @@ void subscriber_task(void *pvParameters)
 
                 case UPDATE_DEVICE_STATE:
                 {
-
-                	value = atof(subscriber_q_data.data);
-                	printf("%.6f", value);
+                	input = (float)subscriber_q_data.data;
+                	printf("%.6f", input);
                 	/* Set the PWM output frequency and duty cycle */
-					result = cyhal_pwm_set_duty_cycle(&pwm_led_control, value, PWM_FREQUENCY);
+					result = cyhal_pwm_set_duty_cycle(&pwm_led_control, input, PWM_FREQUENCY);
 
 					if(CY_RSLT_SUCCESS != result)
 					{
