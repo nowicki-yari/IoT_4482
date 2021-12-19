@@ -9,6 +9,7 @@ import ssl
 from datetime import datetime
 import firebase_admin
 import json
+from flask import request
 
 cred_obj = firebase_admin.credentials.Certificate('weatherstation-iot-8558e-firebase-adminsdk-boway-7b9758599c.json')
 databaseURL = "https://weatherstation-iot-8558e-default-rtdb.firebaseio.com/"
@@ -166,6 +167,36 @@ def data_yesterday():
 			socketio.emit('historical_data', data=data)
 
 	return ("Not needed")
+
+@app.route('/calendarInput', methods=['POST'])
+def calendarInput():
+	date = request.form['date']
+	print("Choosen date: " + str(date))
+
+	#Get the data
+	data = ref.get()
+	data_json = json.dumps(data)
+	data_json = json.loads(data_json)
+
+	#Get the values (nog aanpassen naar juiste datum, mijn tijd was even op)
+	time = []
+	value = []
+	for dataPoint in data_json.values():
+		json_string = json.loads(dataPoint)
+		time.append(json_string["date"])
+		value.append(json_string["data"])
+
+	#Get data of input date
+	day = time[len(time)-1][0] - 1
+	for counter in range(0, len(value)):
+		if time[counter][0] == day:
+			data = dict(
+				time = time[counter],
+				value = value[counter]
+			)
+			socketio.emit('historical_data', data=data)
+
+	return ('', 204)
 
 @mqtt.on_log()
 def handle_logging(client, userdata, level, buf):

@@ -255,6 +255,10 @@
             <form style="float: left; margin: 2px">
                 <a href=# id=day_yesterday><button class='btn btn-default'>Yesterday</button></a>
             </form>
+			<form action="{{ url_for('calendarInput') }}" method="post">
+				<input type="date" id="calendar" name="date" value="2000-01-01" min="2018-01-01" max="2025-12-31">
+				<input type="submit">
+			</form>
 			<canvas id="temperature_history_chart"></canvas>
 		</section>
 		<section id="measurementSettings">
