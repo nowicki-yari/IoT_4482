@@ -51,6 +51,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cy_pdl.h"
+
 /* Task header files */
 #include "publisher_task.h"
 #include "mqtt_task.h"
@@ -142,6 +144,8 @@ void print_heap_usage(char *msg);
 /* Channel 0 input pin */
 #define VPLUS_CHANNEL_0             (P10_0)
 
+#define MCWDT_0_ENABLE_DELAY                (93u)
+
 /*******************************************************************************
 *       Enumerated Types
 *******************************************************************************/
@@ -187,6 +191,21 @@ const cyhal_adc_config_t adc_config = {
 /*
  * Bovenstaande code hoort bij het uitlezen van analoge sensoren
  */
+
+const cy_stc_mcwdt_config_t MCWDT_0_config =
+{
+    .c0Match = 32768U,
+    .c1Match = 32768U,
+    .c0Mode = CY_MCWDT_MODE_NONE,
+    .c1Mode = CY_MCWDT_MODE_NONE,
+    .c2ToggleBit = 16U,
+    .c2Mode = CY_MCWDT_MODE_NONE,
+    .c0ClearOnMatch = false,
+    .c1ClearOnMatch = false,
+    .c0c1Cascade = true,
+    .c1c2Cascade = false,
+};
+#define MCWDT_0_HW MCWDT_STRUCT0
 
 /******************************************************************************
  * Function Name: publisher_task
@@ -242,6 +261,39 @@ void publisher_task(void *pvParameters)
 	 * Bovenstaande code hoort bij het uitlezen van de analoge sensoren
 	*/
 
+	/*
+	 * Onderstaande code hoort bij de timer
+	 */
+	cy_rslt_t result2;
+	cy_en_mcwdt_status_t mcwdt_init_status = CY_MCWDT_SUCCESS;
+	uint32_t event1_cnt, event2_cnt;
+	uint32_t counter1_value, counter0_value;
+
+	/* The time between two presses of switch */
+	uint32_t timegap;
+
+
+	/* Initialize the MCWDT_0 */
+	mcwdt_init_status = Cy_MCWDT_Init(MCWDT_0_HW, &MCWDT_0_config);
+
+	if(mcwdt_init_status!=CY_MCWDT_SUCCESS)
+	{
+		handle_error();
+	}
+
+	/* Enable the MCWDT_0 counters */
+	Cy_MCWDT_Enable(MCWDT_0_HW, CY_MCWDT_CTR0|CY_MCWDT_CTR1,
+					MCWDT_0_ENABLE_DELAY);
+
+	/* Initialize event count value */
+	event1_cnt = 0;
+	event2_cnt = 0;
+
+
+	/*
+	 * Bovenstaande code hoort bij de timer
+	 */
+
     while (true)
     {
         /* Wait for commands from other tasks and callbacks. */
@@ -265,47 +317,89 @@ void publisher_task(void *pvParameters)
 
                 case PUBLISH_MQTT_MSG:
                 {
-                	//Temperatuursensor readout
-                	float adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
-                	printf("Result from sensor %d\n", adc_result_0);
+                	int flag = 1;
+                	while(true){
+						//Test timer*-------------------------------------------------------------
+						/* Consider previous key press as 1st key press event */
 
-                	//Recalculate value to °C
-					float value = (adc_result_0/4095.0)*5000;
-					float celcius = value/10;
-					float farhenheit = (celcius*9)/5 + 32;
+                		if(flag == 1){
+							event1_cnt = event2_cnt;
+							flag = 0;
+						}
 
-					printf("Temperature = %10.10f", celcius);
+						/* Consider current key press as 2nd key press event and get live
+						 * counter value from MCWDT_0.
+						 * Note that MCWDT_0 Counter1 is cascaded from MCWDT_0 Counter0
+						 */
+						counter0_value = Cy_MCWDT_GetCount(MCWDT_0_HW, CY_MCWDT_COUNTER0);
+						counter1_value = Cy_MCWDT_GetCount(MCWDT_0_HW, CY_MCWDT_COUNTER1);
+						event2_cnt = ((counter1_value<<16) | (counter0_value<<0));
 
-                	// convert 123 to string [buf]
-                	char snum[5];
-                	itoa(adc_result_0, snum, 10);
+						/* Calculate the time between two presses of switch and print on the
+						 * terminal. MCWDT Counter0 and Counter1 are clocked by LFClk sourced
+						 * from WCO of frequency 32768 Hz
+						 */
+						if(event2_cnt > event1_cnt)
+						{
+							timegap = (event2_cnt - event1_cnt)/CY_SYSCLK_WCO_FREQ;
+							/* Print the timegap value */
+							//printf("\r\nThe time between two presses of user button = %ds\r\n",(unsigned int)timegap);
+						}
+						else /* counter overflow */
+						{
+							timegap = 0;
+							/* Print a message on overflow of counter */
+							//printf("\r\n\r\nCounter overflow detected\r\n");
+						}
+
+						//Hij zou om de 5 seconden moeten versturen, maar als ik de seconden tel is het eerder 6
+						if(timegap >= 5){
+
+							flag = 1;
+
+							//Temperatuursensor readout
+							float adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
+							printf("Result from sensor %d\n", adc_result_0);
+
+							//Recalculate value to °C
+							float value = (adc_result_0/4095.0)*5000;
+							float celcius = value/10;
+							float farhenheit = (celcius*9)/5 + 32;
+
+							printf("Temperature = %10.10f", celcius);
+
+							// convert 123 to string [buf]
+							char snum[5];
+							itoa(adc_result_0, snum, 10);
 
 
-                    /* Publish the data received over the message queue. */
-                    //publish_info.payload = publisher_q_data.data; //normale code van het voorbeeld
+							/* Publish the data received over the message queue. */
+							//publish_info.payload = publisher_q_data.data; //normale code van het voorbeeld
 
-                	publish_info.payload = snum; //onze sensorwaarde zou toegewezen moeten worden aan de payload
+							publish_info.payload = snum; //onze sensorwaarde zou toegewezen moeten worden aan de payload
 
-                    publish_info.payload_len = strlen(publish_info.payload);
+							publish_info.payload_len = strlen(publish_info.payload);
 
-                    printf("  Publisher: Publishing '%s' on the topic '%s'\n\n",
-                           (char *) publish_info.payload, publish_info.topic);
+							printf("  Publisher: Publishing '%s' on the topic '%s'\n\n",
+								   (char *) publish_info.payload, publish_info.topic);
 
-                    result = cy_mqtt_publish(mqtt_connection, &publish_info);
+							result = cy_mqtt_publish(mqtt_connection, &publish_info);
 
-                    if (result != CY_RSLT_SUCCESS)
-                    {
-                        printf("  Publisher: MQTT Publish failed with error 0x%0X.\n\n", (int)result);
+							if (result != CY_RSLT_SUCCESS)
+							{
+								printf("  Publisher: MQTT Publish failed with error 0x%0X.\n\n", (int)result);
 
-                        /* Communicate the publish failure with the the MQTT
-                         * client task.
-                         */
-                        mqtt_task_cmd = HANDLE_MQTT_PUBLISH_FAILURE;
-                        xQueueSend(mqtt_task_q, &mqtt_task_cmd, portMAX_DELAY);
-                    }
+								/* Communicate the publish failure with the the MQTT
+								 * client task.
+								 */
+								mqtt_task_cmd = HANDLE_MQTT_PUBLISH_FAILURE;
+								xQueueSend(mqtt_task_q, &mqtt_task_cmd, portMAX_DELAY);
+							}
 
-                    print_heap_usage("publisher_task: After publishing an MQTT message");
-                    break;
+							print_heap_usage("publisher_task: After publishing an MQTT message");
+							//break;
+						}
+                	}
                 }
             }
         }
@@ -391,6 +485,7 @@ static void isr_button_press(void *callback_arg, cyhal_gpio_event_t event)
 
     //Assign the publish command to be sent to the publisher task.
     publisher_q_data.cmd = PUBLISH_MQTT_MSG;
+
 
     //Assign the publish message payload so that the device state toggles.
     if (current_device_state == DEVICE_ON_STATE)
@@ -482,6 +577,19 @@ void adc_single_channel_process(void)
     /* Read input voltage, convert it to millivolts and print input voltage */
     adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
     printf("Channel 0 input: %4ldmV\r\n", (long int)adc_result_0);
+}
+
+void handle_error(void)
+{
+     /* Disable all interrupts */
+    __disable_irq();
+
+    /* Turn on error LED */
+    //Cy_GPIO_Write(CYBSP_USER_LED_PORT, CYBSP_USER_LED_PIN, LED_ON);
+
+    /* Halt the CPU */
+    //CY_ASSERT(0);
+
 }
 
 
