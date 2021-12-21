@@ -134,7 +134,7 @@ def data_today():
 	for counter in range(0, len(value)):
 		if time[counter][0] == day:
 			data = dict(
-				time = time[counter],
+				time = time[counter][3:6],
 				value = value[counter]
 			)
 			socketio.emit('historical_data', data=data)
@@ -161,7 +161,7 @@ def data_yesterday():
 	for counter in range(0, len(value)):
 		if time[counter][0] == day:
 			data = dict(
-				time = time[counter],
+				time = time[counter][3:6],
 				value = value[counter]
 			)
 			socketio.emit('historical_data', data=data)
@@ -178,7 +178,7 @@ def calendarInput():
 	data_json = json.dumps(data)
 	data_json = json.loads(data_json)
 
-	#Get the values (nog aanpassen naar juiste datum, mijn tijd was even op)
+	#Get the values
 	time = []
 	value = []
 	for dataPoint in data_json.values():
@@ -187,11 +187,13 @@ def calendarInput():
 		value.append(json_string["data"])
 
 	#Get data of input date
-	day = time[len(time)-1][0] - 1
+	year = str(date[0:4])
+	month = str(date[5:7])
+	day = str(date[8:10])
 	for counter in range(0, len(value)):
-		if time[counter][0] == day:
+		if str(time[counter][0]) == day and str(time[counter][1]) == month and str(time[counter][2]) == year:
 			data = dict(
-				time = time[counter],
+				time = time[counter][3:6],
 				value = value[counter]
 			)
 			socketio.emit('historical_data', data=data)
