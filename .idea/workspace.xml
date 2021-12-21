@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="76b05d0b-ab8b-4f1c-89b5-785fc703c970" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Ver24ota2/MQTT_Mosquitto/source/subscriber_task.c" beforeDir="false" afterPath="$PROJECT_DIR$/Ver24ota2/MQTT_Mosquitto/source/subscriber_task.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Ver24ota2/MQTT_Mosquitto/source/subscriber_task.h" beforeDir="false" afterPath="$PROJECT_DIR$/Ver24ota2/MQTT_Mosquitto/source/subscriber_task.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App.py" beforeDir="false" afterPath="$PROJECT_DIR$/App.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ver24ota2/MQTT_Mosquitto/configs/mqtt_client_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/Ver24ota2/MQTT_Mosquitto/configs/mqtt_client_config.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Ver24ota2/mtb_shared/aws-iot-device-sdk-embedded-C/202103.00" beforeDir="false" afterPath="$PROJECT_DIR$/Ver24ota2/mtb_shared/aws-iot-device-sdk-embedded-C/202103.00" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/test.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/test.html" afterDir="false" />
     </list>
@@ -140,6 +140,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/IoT_4482$IoT_4482.coverage" NAME="IoT_4482 Coverage Results" MODIFIED="1639812025477" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/IoT_4482$Flask__App_py_.coverage" NAME="Flask (App.py) Coverage Results" MODIFIED="1639821616501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/IoT_4482$Flask__App_py_.coverage" NAME="Flask (App.py) Coverage Results" MODIFIED="1640104174783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>

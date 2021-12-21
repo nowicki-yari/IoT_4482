@@ -68,7 +68,7 @@
 
 /********************* MQTT MESSAGE CONFIGURATION MACROS **********************/
 /* The MQTT topics to be used by the publisher ctand subscriber. */
-#define MQTT_PUB_TOPIC                    "ledstatus"
+#define MQTT_PUB_TOPIC                    "moist"
 #define MQTT_SUB_TOPIC                    "pwm"
 
 /* Set the QoS that is associated with the MQTT publish, and subscribe messages.

@@ -8,6 +8,7 @@
 <script type="text/javascript" charset="utf-8">
     var socket = io();
     var realTimeData;
+    var realTimeDataMoist;
     window.addEventListener('load', function() {
         const ctx = document.getElementById('temperature_chart').getContext('2d');
         realTimeData = new Chart(ctx, {
@@ -33,7 +34,38 @@
                 }]
             },
         }
-    });
+        });
+
+    })
+
+    window.addEventListener('load', function() {
+        const ctx = document.getElementById('moist_chart').getContext('2d');
+        const canvas = document.getElementById('moist_chart');
+        canvas.style.display = "none"
+        realTimeDataMoist = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Moist',
+                data: []
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+        }
+        });
     })
 
 
@@ -43,7 +75,14 @@
         socket.on('mqtt_message', function(data) {
             const d = new Date();
             let time = d.toLocaleTimeString();
-            addData(realTimeData, time, data['payload']);
+            if (data['topic']=='ledstatus') {
+                addData(realTimeData, time, data['payload']);
+                console.log("ledstatus");
+            } else if (data['topic']=='moist') {
+                console.log("moist")
+                addData(realTimeDataMoist, time, data['payload']);
+            }
+
         })
 
     });
@@ -90,15 +129,16 @@
                 }]
             },
         }
-    });
+        });
     })
+
+
 
     $(document).ready(function() {
         //var socket = io.connect('http://' + document.domain + ':' + location.port, {secure: true});
         socket.on('historical_data', function(data) {
-            addData(historicalData, data['time'], data['value']);
+				addData(historicalData, data['time'], data['value']);
         })
-
     });
 
     function addData(chart, label, data) {
@@ -109,12 +149,23 @@
         chart.update();
     }
 
+	function isObjectEmpty(obj) {
+		return Object.keys(obj).length === 0;
+	}
+
     function publish(message) {
+        const canvas = document.getElementById('moist_chart')
+        if (message == 'ON') {
+            canvas.style.display = "block"
+        } else if (message == 'OFF') {
+            canvas.style.display = "none"
+        }
         var data = '{"topic": "pwm", "message": "' + message + '", "qos": 1}';
         socket.emit('publish', data=data);
     }
 
 </script>
+
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type=text/javascript>
         $(function() {
@@ -153,7 +204,7 @@
           });
         });
 </script>
-  
+
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -168,7 +219,7 @@
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css" integrity="sha384-MIwDKRSSImVFAZCVLtU0LMDdON6KVCrZHyVQQj6e8wIEJkW4tvwqXrbMIya1vriY" crossorigin="anonymous">
-      
+
     <!-- Some extra styles (remove if not needed) -->
     <style>
         section {
@@ -240,6 +291,7 @@
             <form style="float: left; margin: 2px">
                 <a href=# id=disable_sensor><button class='btn btn-default' onclick="publish('OFF')">Disable</button></a>
             </form>
+            <canvas id="moist_chart"></canvas>
 		</section>
 		<section id="temperatureData">
 			<h2> Temperature Data </h2>
@@ -248,18 +300,37 @@
 		</section>
 		<section id="history">
 			<h2> Data History </h2>
-			<p> Here you can find the previous measurements. </p>
+			<p> Here you can find the previous measurements. Use the buttons or pick a date and import the data. </p>
             <form style="float: left; margin: 2px">
                 <a href=# id=day_today><button class='btn btn-default'>Today</button></a>
             </form>
             <form style="float: left; margin: 2px">
                 <a href=# id=day_yesterday><button class='btn btn-default'>Yesterday</button></a>
             </form>
+			<form action="{{ url_for('calendarInput') }}" method="post" style="float: left; margin: 2px">
+				<input type="date" id="calendar" name="date" value="2000-01-01" min="2018-01-01" max="2025-12-31" class='btn btn-default'>
+				<input type="submit" value="Import data" class='btn btn-default'>
+			</form>
 			<canvas id="temperature_history_chart"></canvas>
 		</section>
 		<section id="measurementSettings">
 			<h2> Measurement Settings </h2>
             <p> Here you can change the settings of the measurements.</p>
+				<ul>
+					<li> Choose temperature format: (Knoppen hebben nog geen functie)</li>
+						<div class="custom-controls-stacked">
+							<label class="custom-control custom-radio">
+								<input checked id="bulletCelcius" name="radio-stacked" type="radio" class="custom-control-input">
+								<span class="custom-control-indicator"></span>
+								<span class="custom-control-description">Celcius</span>
+							</label>
+							<label class="custom-control custom-radio">
+								<input id="bulletFarenheit" name="radio-stacked" type="radio" class="custom-control-input">
+								<span class="custom-control-indicator"></span>
+								<span class="custom-control-description">Farenheit</span>
+							</label>
+						</div>
+				</ul>
 		</section>
 		<section id="about">
 			<h2> About The Authors </h2>
@@ -384,7 +455,7 @@
                   </tr>
                 </tbody>
             </table>
-            
+
         </section>
 
 
@@ -454,10 +525,10 @@
                 </div>
             </div>
         </section>
-        
+
         <section id="tags">
             <h2>Introducing <span class="tag tag-default">Tags</span></h2>
-            <p>Bootstrap's tag classes can be used to highlight additional information that's appended to a string of text. </p> 
+            <p>Bootstrap's tag classes can be used to highlight additional information that's appended to a string of text. </p>
             <p><a href="http://www.quackit.com/bootstrap/bootstrap_4/tutorial/bootstrap_tags.cfm">Tags</a> replace labels from Bootstrap 3.</p>
             <h3>Contextual Tags</h3>
             <p>Add some color based on context.</p>
@@ -540,18 +611,18 @@
 
         <section id="progress">
             <h2>Progress Bars</h2>
-            <p>Bootstrap 4 takes advantage of the HTML5 <a href="http://www.quackit.com/html/tags/html_progress_tag.cfm"><code>&lt;progress&gt;</code></a> element when working with progress bars.</p> 
+            <p>Bootstrap 4 takes advantage of the HTML5 <a href="http://www.quackit.com/html/tags/html_progress_tag.cfm"><code>&lt;progress&gt;</code></a> element when working with progress bars.</p>
             <progress class="progress progress-success" value="73" max="100">73%</progress>
             <progress class="progress progress-info" value="500" max="1000">50%</progress>
             <progress class="progress progress-warning" value="35" max="100">35%</progress>
-            <progress class="progress progress-danger" value="200" max="1000">20%</progress>     
+            <progress class="progress progress-danger" value="200" max="1000">20%</progress>
         </section>
 
 
         <section id="tables">
             <h2>Responsive Tables</h2>
-            <p>Bootstrap 4 allows you to apply the <code>.table-responsive</code> class directly to the table (as opposed to being required to apply it to a parent element, like in Bootstrap 3).</p> 
-  
+            <p>Bootstrap 4 allows you to apply the <code>.table-responsive</code> class directly to the table (as opposed to being required to apply it to a parent element, like in Bootstrap 3).</p>
+
             <table class="table table-responsive">
                 <thead>
                     <tr>
@@ -736,7 +807,7 @@
     $(function () {
       $('[data-toggle="popover"]').popover()
     })
-    </script>    
+    </script>
 
   </body>
 </html>
