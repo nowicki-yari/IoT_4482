@@ -207,6 +207,43 @@ const cy_stc_mcwdt_config_t MCWDT_0_config =
 };
 #define MCWDT_0_HW MCWDT_STRUCT0
 
+/* PWM LED frequency constants (in Hz) */
+#define PWM_FAST_FREQ_HZ        10
+#define PWM_SLOW_FREQ_HZ        2
+#define PWM_DIM_FREQ_HZ         100
+
+/* PWM Duty cycles (Active Low, in %) */
+#define PWM_50P_DUTY_CYCLE      50.0f
+#define PWM_10P_DUTY_CYCLE      90.0f
+#define PWM_100P_DUTY_CYCLE     0.0f
+
+/* Clock frequency constants (in Hz) */
+#define CLOCK_50_MHZ            50000000u
+#define CLOCK_100_MHZ           100000000u
+
+/* Glitch delays */
+#define SHORT_GLITCH_DELAY_MS   10u     /* in ms */
+#define LONG_GLITCH_DELAY_MS    100u    /* in ms */
+
+typedef enum
+{
+    SWITCH_NO_EVENT     = 0u,
+    SWITCH_QUICK_PRESS  = 1u,
+    SWITCH_SHORT_PRESS  = 2u,
+    SWITCH_LONG_PRESS   = 3u,
+} en_switch_event_t;
+
+/* HAL Objects */
+cyhal_pwm_t pwm;
+cyhal_clock_t system_clock;
+
+/* Power callbacks */
+bool pwm_power_callback(cyhal_syspm_callback_state_t state, cyhal_syspm_callback_mode_t mode, void *arg);
+bool clk_power_callback(cyhal_syspm_callback_state_t state, cyhal_syspm_callback_mode_t mode, void *arg);
+
+
+
+
 /******************************************************************************
  * Function Name: publisher_task
  ******************************************************************************
@@ -294,9 +331,55 @@ void publisher_task(void *pvParameters)
 	 * Bovenstaande code hoort bij de timer
 	 */
 
+	/* Initialize the User Button */
+	cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
+	/* Enable the GPIO interrupt to wake-up the device */
+	cyhal_gpio_enable_event(CYBSP_USER_BTN, CYHAL_GPIO_IRQ_FALL, CYHAL_ISR_PRIORITY_DEFAULT, true);
+
+	/* Initialize the PWM to control LED brightness */
+	cyhal_pwm_init(&pwm, CYBSP_USER_LED, NULL);
+	cyhal_pwm_set_duty_cycle(&pwm, PWM_50P_DUTY_CYCLE, PWM_FAST_FREQ_HZ);
+	cyhal_pwm_start(&pwm);
+
+	/* Init the system clock (based on FLL) to enable frequency changes later */
+	cyhal_clock_get(&system_clock, &CYHAL_CLOCK_FLL);
+	cyhal_clock_init(&system_clock);
+
+	/* Callback declaration for Power Modes */
+	cyhal_syspm_callback_data_t pwm_callback = {pwm_power_callback,             /* Callback function */
+											   (cyhal_syspm_callback_state_t)
+											   (CYHAL_SYSPM_CB_CPU_SLEEP |
+												CYHAL_SYSPM_CB_CPU_DEEPSLEEP |
+												CYHAL_SYSPM_CB_SYSTEM_NORMAL |
+												CYHAL_SYSPM_CB_SYSTEM_LOW),     /* Power States supported */
+											   (cyhal_syspm_callback_mode_t)
+											   (CYHAL_SYSPM_CHECK_FAIL),        /* Modes to ignore */
+												NULL,                           /* Callback Argument */
+												NULL};                          /* For internal use */
+
+	cyhal_syspm_callback_data_t clk_callback = {clk_power_callback,             /* Callback function */
+											   (cyhal_syspm_callback_state_t)
+											   (CYHAL_SYSPM_CB_CPU_SLEEP |
+												CYHAL_SYSPM_CB_CPU_DEEPSLEEP |
+												CYHAL_SYSPM_CB_SYSTEM_NORMAL |
+												CYHAL_SYSPM_CB_SYSTEM_LOW),     /* Power States supported */
+											   (cyhal_syspm_callback_mode_t)
+											   (CYHAL_SYSPM_CHECK_READY |
+												CYHAL_SYSPM_CHECK_FAIL),        /* Modes to ignore */
+												NULL,                           /* Callback Argument */
+												NULL};                          /* For internal use */
+
+	/* Initialize the System Power Management */
+	cyhal_syspm_init();
+
+	/* Power Management Callback registration */
+	cyhal_syspm_register_callback(&clk_callback);
+	cyhal_syspm_register_callback(&pwm_callback);
+
     while (true)
     {
         /* Wait for commands from other tasks and callbacks. */
+    	en_switch_event_t event = SWITCH_NO_EVENT;
         if (pdTRUE == xQueueReceive(publisher_task_q, &publisher_q_data, portMAX_DELAY))
         {
             switch(publisher_q_data.cmd)
@@ -318,6 +401,9 @@ void publisher_task(void *pvParameters)
                 case PUBLISH_MQTT_MSG:
                 {
                 	int flag = 1;
+                	int enterLowPower = 1;
+                	int enterReadOut = 0;
+
                 	while(true){
 						//Test timer*-------------------------------------------------------------
 						/* Consider previous key press as 1st key press event */
@@ -352,9 +438,19 @@ void publisher_task(void *pvParameters)
 							//printf("\r\n\r\nCounter overflow detected\r\n");
 						}
 
-						//Hij zou om de 5 seconden moeten versturen, maar als ik de seconden tel is het eerder 6
-						if(timegap >= 5){
+						if (timegap < 10 && enterLowPower == 1){
+							cyhal_syspm_set_system_state(CYHAL_SYSPM_SYSTEM_LOW);
+							enterReadOut = 0;
+							enterLowPower = 0;
+						}
+						else if(timegap >= 10 && enterLowPower == 0){
+							cyhal_syspm_set_system_state(CYHAL_SYSPM_SYSTEM_NORMAL);
+							enterReadOut = 1;
+							enterLowPower = 1;
+						}
 
+						//Hij zou om de 5 seconden moeten versturen, maar als ik de seconden tel is het eerder 6
+						if(enterReadOut == 1){
 							flag = 1;
 
 							//Temperatuursensor readout
@@ -398,6 +494,11 @@ void publisher_task(void *pvParameters)
 
 							print_heap_usage("publisher_task: After publishing an MQTT message");
 							//break;
+
+							//Maak extra load om de led goed te zien flikkeren
+							for(int i = 0; i<1000000; i++){
+								//
+							}
 						}
                 	}
                 }
@@ -590,6 +691,129 @@ void handle_error(void)
     /* Halt the CPU */
     //CY_ASSERT(0);
 
+}
+
+/*******************************************************************************
+* Function Name: pwm_power_callback
+********************************************************************************
+* Summary:
+*  Callback implementation for the PWM block. It changes the blinking pattern
+*  based on the power state and MCU state.
+*
+* Parameters:
+*  state - state the system or CPU is being transitioned into
+*  mode  - callback mode
+*  arg   - user argument (not used)
+*
+* Return:
+*  Always true
+*
+*******************************************************************************/
+bool pwm_power_callback(cyhal_syspm_callback_state_t state, cyhal_syspm_callback_mode_t mode, void *arg)
+{
+    (void) arg;
+
+    /* Stop the PWM before applying any changes */
+    cyhal_pwm_stop(&pwm);
+
+    if (mode == CYHAL_SYSPM_BEFORE_TRANSITION)
+    {
+        if (state == CYHAL_SYSPM_CB_CPU_SLEEP)
+        {
+            /* Check if the device is in Low Power Mode */
+            if (cyhal_syspm_get_system_state() == CYHAL_SYSPM_SYSTEM_LOW)
+            {
+                /* Before going to Low Power Sleep Mode, set LED brightness to 10% */
+                cyhal_pwm_set_duty_cycle(&pwm, PWM_10P_DUTY_CYCLE, PWM_DIM_FREQ_HZ);
+            }
+            else
+            {
+                /* Before going to Normal Power Sleep Mode, set LED brightness to 100% */
+                cyhal_pwm_set_duty_cycle(&pwm, PWM_100P_DUTY_CYCLE, PWM_DIM_FREQ_HZ);
+            }
+
+            /* Restart the PWM */
+            cyhal_pwm_start(&pwm);
+        }
+    }
+    else if (mode == CYHAL_SYSPM_AFTER_TRANSITION)
+    {
+        switch (state)
+        {
+            case CYHAL_SYSPM_CB_CPU_SLEEP:
+            case CYHAL_SYSPM_CB_CPU_DEEPSLEEP:
+                /* Check if the device is in Low Power Mode */
+                if (cyhal_syspm_get_system_state() == CYHAL_SYSPM_SYSTEM_LOW)
+                {
+                    /* After waking up, set the slow blink pattern */
+                    cyhal_pwm_set_duty_cycle(&pwm, PWM_50P_DUTY_CYCLE, PWM_SLOW_FREQ_HZ);
+                }
+                else
+                {
+                    /* After waking up, set the fast blink pattern */
+                    cyhal_pwm_set_duty_cycle(&pwm, PWM_50P_DUTY_CYCLE, PWM_FAST_FREQ_HZ);
+                }
+                break;
+
+            case CYHAL_SYSPM_CB_SYSTEM_NORMAL:
+                /* Set fast blinking rate when in Normal Power state*/
+                cyhal_pwm_set_duty_cycle(&pwm, PWM_50P_DUTY_CYCLE, PWM_FAST_FREQ_HZ);
+                break;
+
+            case CYHAL_SYSPM_CB_SYSTEM_LOW:
+                /* Set slow blinking rate when in Low Power state */
+                cyhal_pwm_set_duty_cycle(&pwm, PWM_50P_DUTY_CYCLE, PWM_SLOW_FREQ_HZ);
+                break;
+
+            default:
+                break;
+        }
+
+        /* Restart the PWM */
+        cyhal_pwm_start(&pwm);
+    }
+
+    return true;
+}
+
+/*******************************************************************************
+* Function Name: clk_power_callback
+********************************************************************************
+* Summary:
+*  Callback implementation for the clocks. It swaps the system frequency between
+*  50 MHz and 100 MHz, depending on the power state.
+*
+* Parameters:
+*  state - state the system or CPU is being transitioned into
+*  mode  - callback mode
+*  arg   - user argument (not used)
+*
+* Return:
+*  Always true
+*
+*******************************************************************************/
+bool clk_power_callback(cyhal_syspm_callback_state_t state, cyhal_syspm_callback_mode_t mode, void *arg)
+{
+    (void) arg;
+
+    if (mode == CYHAL_SYSPM_AFTER_TRANSITION)
+    {
+        if (state == CYHAL_SYSPM_CB_SYSTEM_NORMAL)
+        {
+            /* Set the system clock to 100 MHz */
+            cyhal_clock_set_frequency(&system_clock, CLOCK_100_MHZ, NULL);
+        }
+    }
+    else if (mode == CYHAL_SYSPM_BEFORE_TRANSITION)
+    {
+        if (state == CYHAL_SYSPM_CB_SYSTEM_LOW)
+        {
+            /* Set the System Clock to 50 MHz */
+            cyhal_clock_set_frequency(&system_clock, CLOCK_50_MHZ, NULL);
+        }
+    }
+
+    return true;
 }
 
 

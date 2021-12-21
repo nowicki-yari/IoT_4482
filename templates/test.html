@@ -251,22 +251,37 @@
 		</section>
 		<section id="history">
 			<h2> Data History </h2>
-			<p> Here you can find the previous measurements. </p>
+			<p> Here you can find the previous measurements. Use the buttons or pick a date and import the data. </p>
             <form style="float: left; margin: 2px">
                 <a href=# id=day_today><button class='btn btn-default'>Today</button></a>
             </form>
             <form style="float: left; margin: 2px">
                 <a href=# id=day_yesterday><button class='btn btn-default'>Yesterday</button></a>
             </form>
-			<form action="{{ url_for('calendarInput') }}" method="post">
-				<input type="date" id="calendar" name="date" value="2000-01-01" min="2018-01-01" max="2025-12-31">
-				<input type="submit">
+			<form action="{{ url_for('calendarInput') }}" method="post" style="float: left; margin: 2px">
+				<input type="date" id="calendar" name="date" value="2000-01-01" min="2018-01-01" max="2025-12-31" class='btn btn-default'>
+				<input type="submit" value="Import data" class='btn btn-default'>
 			</form>
 			<canvas id="temperature_history_chart"></canvas>
 		</section>
 		<section id="measurementSettings">
 			<h2> Measurement Settings </h2>
             <p> Here you can change the settings of the measurements.</p>
+				<ul>
+					<li> Choose temperature format: (Knoppen hebben nog geen functie)</li>
+						<div class="custom-controls-stacked">
+							<label class="custom-control custom-radio">
+								<input checked id="bulletCelcius" name="radio-stacked" type="radio" class="custom-control-input">
+								<span class="custom-control-indicator"></span>
+								<span class="custom-control-description">Celcius</span>
+							</label>
+							<label class="custom-control custom-radio">
+								<input id="bulletFarenheit" name="radio-stacked" type="radio" class="custom-control-input">
+								<span class="custom-control-indicator"></span>
+								<span class="custom-control-description">Farenheit</span>
+							</label>
+						</div>
+				</ul>
 		</section>
 		<section id="about">
 			<h2> About The Authors </h2>
