@@ -115,7 +115,7 @@ static void isr_button_press(void *callback_arg, cyhal_gpio_event_t event);
 void print_heap_usage(char *msg);
 
 /*
- * Onderstaande code hoort bij het uitlezen van analoge sensoren
+ * Readout analog sensors
  */
 #include "cy_pdl.h"
 #include "cyhal.h"
@@ -188,9 +188,6 @@ const cyhal_adc_config_t adc_config = {
         .resolution = 12u,          // 12-bit resolution
         .ext_vref = NC,             // No connection
         .bypass_pin = NC };       // No connection
-/*
- * Bovenstaande code hoort bij het uitlezen van analoge sensoren
- */
 
 const cy_stc_mcwdt_config_t MCWDT_0_config =
 {
@@ -241,9 +238,6 @@ cyhal_clock_t system_clock;
 bool pwm_power_callback(cyhal_syspm_callback_state_t state, cyhal_syspm_callback_mode_t mode, void *arg);
 bool clk_power_callback(cyhal_syspm_callback_state_t state, cyhal_syspm_callback_mode_t mode, void *arg);
 
-
-
-
 /******************************************************************************
  * Function Name: publisher_task
  ******************************************************************************
@@ -279,9 +273,6 @@ void publisher_task(void *pvParameters)
     /* Create a message queue to communicate with other tasks and callbacks. */
     publisher_task_q = xQueueCreate(PUBLISHER_TASK_QUEUE_LENGTH, sizeof(publisher_data_t));
 
-    /*
-     * Onderstaande code hoort bij het uitlezen van de analoge sensoren
-     */
 	/* Initialize Channel 0 */
 	adc_single_channel_init();
 
@@ -294,13 +285,6 @@ void publisher_task(void *pvParameters)
 		CY_ASSERT(0);
 	}
 
-	/*
-	 * Bovenstaande code hoort bij het uitlezen van de analoge sensoren
-	*/
-
-	/*
-	 * Onderstaande code hoort bij de timer
-	 */
 	cy_rslt_t result2;
 	cy_en_mcwdt_status_t mcwdt_init_status = CY_MCWDT_SUCCESS;
 	uint32_t event1_cnt, event2_cnt;
@@ -308,7 +292,6 @@ void publisher_task(void *pvParameters)
 
 	/* The time between two presses of switch */
 	uint32_t timegap;
-
 
 	/* Initialize the MCWDT_0 */
 	mcwdt_init_status = Cy_MCWDT_Init(MCWDT_0_HW, &MCWDT_0_config);
@@ -325,11 +308,6 @@ void publisher_task(void *pvParameters)
 	/* Initialize event count value */
 	event1_cnt = 0;
 	event2_cnt = 0;
-
-
-	/*
-	 * Bovenstaande code hoort bij de timer
-	 */
 
 	/* Initialize the User Button */
 	cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
@@ -405,7 +383,6 @@ void publisher_task(void *pvParameters)
                 	int enterReadOut = 0;
 
                 	while(true){
-						//Test timer*-------------------------------------------------------------
 						/* Consider previous key press as 1st key press event */
 
                 		if(flag == 1){
@@ -428,14 +405,10 @@ void publisher_task(void *pvParameters)
 						if(event2_cnt > event1_cnt)
 						{
 							timegap = (event2_cnt - event1_cnt)/CY_SYSCLK_WCO_FREQ;
-							/* Print the timegap value */
-							//printf("\r\nThe time between two presses of user button = %ds\r\n",(unsigned int)timegap);
 						}
 						else /* counter overflow */
 						{
 							timegap = 0;
-							/* Print a message on overflow of counter */
-							//printf("\r\n\r\nCounter overflow detected\r\n");
 						}
 
 						if (timegap < 10 && enterLowPower == 1){
@@ -449,7 +422,6 @@ void publisher_task(void *pvParameters)
 							enterLowPower = 1;
 						}
 
-						//Hij zou om de 5 seconden moeten versturen, maar als ik de seconden tel is het eerder 6
 						if(enterReadOut == 1){
 							flag = 1;
 
@@ -458,21 +430,15 @@ void publisher_task(void *pvParameters)
 							printf("Result from sensor %d\n", adc_result_0);
 
 							//Recalculate value to °C
-							float value = (adc_result_0/4095.0)*5000;
-							float celcius = value/10;
-							float farhenheit = (celcius*9)/5 + 32;
-
+							float celcius = adc_result_0/10;
 							printf("Temperature = %10.10f", celcius);
 
 							// convert 123 to string [buf]
 							char snum[5];
-							itoa(adc_result_0, snum, 10);
-
+							itoa(celcius, snum, 10);
 
 							/* Publish the data received over the message queue. */
-							//publish_info.payload = publisher_q_data.data; //normale code van het voorbeeld
-
-							publish_info.payload = snum; //onze sensorwaarde zou toegewezen moeten worden aan de payload
+							publish_info.payload = snum;
 
 							publish_info.payload_len = strlen(publish_info.payload);
 
@@ -493,9 +459,8 @@ void publisher_task(void *pvParameters)
 							}
 
 							print_heap_usage("publisher_task: After publishing an MQTT message");
-							//break;
 
-							//Maak extra load om de led goed te zien flikkeren
+							//Extra load to see the led blinking
 							for(int i = 0; i<1000000; i++){
 								//
 							}

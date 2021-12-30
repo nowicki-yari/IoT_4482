@@ -131,6 +131,8 @@ def data_today():
 
 	#Get data of today
 	day = time[len(time)-1][0]
+	times = []
+	values = []
 	for counter in range(0, len(value)):
 		if time[counter][0] == day:
 			data = dict(
