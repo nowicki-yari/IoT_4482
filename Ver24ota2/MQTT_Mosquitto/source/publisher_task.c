@@ -188,6 +188,12 @@ const cyhal_adc_config_t adc_config = {
  * Bovenstaande code hoort bij het uitlezen van analoge sensoren
  */
 
+#define MCWDT_0_HW MCWDT_STRUCT0
+
+/* HAL Objects */
+cyhal_pwm_t pwm;
+cyhal_clock_t system_clock;
+
 /******************************************************************************
  * Function Name: publisher_task
  ******************************************************************************
@@ -242,6 +248,22 @@ void publisher_task(void *pvParameters)
 	 * Bovenstaande code hoort bij het uitlezen van de analoge sensoren
 	*/
 
+	cy_rslt_t result2;
+	cy_en_mcwdt_status_t mcwdt_init_status = CY_MCWDT_SUCCESS;
+	uint32_t event1_cnt, event2_cnt;
+	uint32_t counter1_value, counter0_value;
+
+	/* The time between two presses of switch */
+	uint32_t timegap;
+
+	/* Init the system clock (based on FLL) to enable frequency changes later */
+	cyhal_clock_get(&system_clock, &CYHAL_CLOCK_FLL);
+	cyhal_clock_init(&system_clock);
+
+	/* Initialize event count value */
+	event1_cnt = 0;
+	event2_cnt = 0;
+
     while (true)
     {
         /* Wait for commands from other tasks and callbacks. */
@@ -265,47 +287,81 @@ void publisher_task(void *pvParameters)
 
                 case PUBLISH_MQTT_MSG:
                 {
-                	//Temperatuursensor readout
-                	float adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
-                	printf("Result from sensor %d\n", adc_result_0);
+                	int enterReadOut = 0;
+                	int flag = 1;
+                	while(true) {
+                		if(flag == 1){
+							event1_cnt = event2_cnt;
+							flag = 0;
+						}
+                		counter0_value = Cy_MCWDT_GetCount(MCWDT_0_HW, CY_MCWDT_COUNTER0);
+						counter1_value = Cy_MCWDT_GetCount(MCWDT_0_HW, CY_MCWDT_COUNTER1);
+						event2_cnt = ((counter1_value<<16) | (counter0_value<<0));
+						/* Calculate the time between two presses of switch and print on the
+						 * terminal. MCWDT Counter0 and Counter1 are clocked by LFClk sourced
+						 * from WCO of frequency 32768 Hz
+						 */
+						if(event2_cnt > event1_cnt)
+						{
+							timegap = (event2_cnt - event1_cnt)/CY_SYSCLK_WCO_FREQ;
+						}
+						else /* counter overflow */
+						{
+							timegap = 0;
+						}
 
-                	//Recalculate value to °C
-					float value = (adc_result_0/4095.0)*5000;
-					float celcius = value/10;
-					float farhenheit = (celcius*9)/5 + 32;
+						if (timegap < 10){
+							enterReadOut = 0;
+						}
+						else if(timegap >= 10){
+							enterReadOut = 1;
+						}
+						if(enterReadOut == 1){
+							flag = 1;
+							//Temperatuursensor readout
+							float adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
+							printf("Result from sensor %d\n", adc_result_0);
 
-					printf("Temperature = %10.10f", celcius);
+							//Recalculate value to °C
+							float value = (adc_result_0/4095.0)*5000;
+							float celcius = value/10;
+							float farhenheit = (celcius*9)/5 + 32;
 
-                	// convert 123 to string [buf]
-                	char snum[5];
-                	itoa(adc_result_0, snum, 10);
+							printf("Temperature = %10.10f", celcius);
+
+							// convert 123 to string [buf]
+							char snum[5];
+							itoa(adc_result_0, snum, 10);
 
 
-                    /* Publish the data received over the message queue. */
-                    //publish_info.payload = publisher_q_data.data; //normale code van het voorbeeld
+							/* Publish the data received over the message queue. */
+							//publish_info.payload = publisher_q_data.data; //normale code van het voorbeeld
 
-                	publish_info.payload = snum; //onze sensorwaarde zou toegewezen moeten worden aan de payload
+							publish_info.payload = snum; //onze sensorwaarde zou toegewezen moeten worden aan de payload
 
-                    publish_info.payload_len = strlen(publish_info.payload);
+							publish_info.payload_len = strlen(publish_info.payload);
 
-                    printf("  Publisher: Publishing '%s' on the topic '%s'\n\n",
-                           (char *) publish_info.payload, publish_info.topic);
+							printf("  Publisher: Publishing '%s' on the topic '%s'\n\n",
+								   (char *) publish_info.payload, publish_info.topic);
 
-                    result = cy_mqtt_publish(mqtt_connection, &publish_info);
+							result = cy_mqtt_publish(mqtt_connection, &publish_info);
 
-                    if (result != CY_RSLT_SUCCESS)
-                    {
-                        printf("  Publisher: MQTT Publish failed with error 0x%0X.\n\n", (int)result);
+							if (result != CY_RSLT_SUCCESS)
+							{
+								printf("  Publisher: MQTT Publish failed with error 0x%0X.\n\n", (int)result);
 
-                        /* Communicate the publish failure with the the MQTT
-                         * client task.
-                         */
-                        mqtt_task_cmd = HANDLE_MQTT_PUBLISH_FAILURE;
-                        xQueueSend(mqtt_task_q, &mqtt_task_cmd, portMAX_DELAY);
-                    }
+								/* Communicate the publish failure with the the MQTT
+								 * client task.
+								 */
+								mqtt_task_cmd = HANDLE_MQTT_PUBLISH_FAILURE;
+								xQueueSend(mqtt_task_q, &mqtt_task_cmd, portMAX_DELAY);
+							}
 
-                    print_heap_usage("publisher_task: After publishing an MQTT message");
-                    break;
+							print_heap_usage("publisher_task: After publishing an MQTT message");
+						}
+
+                	}
+
                 }
             }
         }
