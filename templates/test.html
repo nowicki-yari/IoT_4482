@@ -95,11 +95,6 @@
         chart.update();
     }
 
-    function publish(message) {
-        var data = '{"topic": "pwm", "message": "' + message + '", "qos": 1}';
-        socket.emit('publish', data=data);
-    }
-
 </script>
 <script type="text/javascript" charset="utf-8">
     var socket = io();

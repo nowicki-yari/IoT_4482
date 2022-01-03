@@ -319,7 +319,7 @@ void publisher_task(void *pvParameters)
 						if(enterReadOut == 1){
 							flag = 1;
 							//Temperatuursensor readout
-							float adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/1000;
+							float adc_result_0 = cyhal_adc_read_uv(&adc_chan_0_obj)/10000;
 							printf("Result from sensor %d\n", adc_result_0);
 
 							//Recalculate value to °C
